@@ -1,0 +1,71 @@
+@page "/borrow-manage"
+@inject FakeDataStore Store
+
+<PageTitle>借閱管理</PageTitle>
+
+<RoleGuard Role="@Roles.Admin">
+    <DueBanner DueSoon="dueSoon" Overdue="overdue" />
+
+    <div class="d-flex flex-wrap gap-2 mb-3">
+        @foreach (var (f, label) in filters)
+        {
+            <button class="btn btn-sm @(filter == f ? "btn-dark" : "btn-outline-secondary")"
+                    @onclick="() => SetFilter(f)">@label</button>
+        }
+    </div>
+
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr><th>書名</th><th>借閱人</th><th>借出</th><th>應還</th><th>歸還</th><th>狀態</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var row in rows)
+                {
+                    var r = row.Record;
+                    <tr>
+                        <td>@row.BookTitle</td>
+                        <td>@row.BorrowerName</td>
+                        <td>@r.BorrowedAt.ToString("MM/dd")</td>
+                        <td>@r.DueDate.ToString("MM/dd")</td>
+                        <td>@(r.ReturnedAt?.ToString("MM/dd") ?? "—")</td>
+                        <td><StatusBadge Status="BorrowStatus.Of(r, today)" /></td>
+                    </tr>
+                }
+                @if (rows.Count == 0)
+                {
+                    <tr><td colspan="6" class="text-center text-muted py-4">沒有符合的借閱紀錄</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <Pager Page="page" Total="total" PageChanged="GoPage" />
+</RoleGuard>
+
+@code {
+    private static readonly (BorrowFilter, string)[] filters =
+    {
+        (BorrowFilter.All, "全部"),
+        (BorrowFilter.Active, "借閱中"),
+        (BorrowFilter.DueSoon, "即將到期"),
+        (BorrowFilter.Overdue, "逾期"),
+        (BorrowFilter.Returned, "已歸還"),
+    };
+
+    private readonly DateTime today = DateTime.Today;
+    private BorrowFilter filter = BorrowFilter.All;
+    private List<BorrowRow> rows = new();
+    private int page = 1, total, dueSoon, overdue;
+
+    protected override void OnInitialized() => Load();
+
+    private void Load()
+    {
+        (rows, total) = Store.GetAllRecords(filter, page);
+        (dueSoon, overdue) = Store.CountDue(null);
+    }
+
+    private void SetFilter(BorrowFilter f) { filter = f; page = 1; Load(); }
+    private void GoPage(int p) { page = p; Load(); }
+}

@@ -1,0 +1,15 @@
+@* 業務結果提示訊息（成功 / 失敗） *@
+@if (Result != null)
+{
+    <div class="alert @(Result.Success ? "alert-success" : "alert-danger") alert-dismissible py-2 mb-3" role="alert">
+        @Result.Message
+        <button type="button" class="btn-close py-2" aria-label="關閉" @onclick="Dismiss"></button>
+    </div>
+}
+
+@code {
+    [Parameter] public Result? Result { get; set; }
+    [Parameter] public EventCallback<Result?> ResultChanged { get; set; }
+
+    private Task Dismiss() => ResultChanged.InvokeAsync(null);
+}

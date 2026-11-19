@@ -1,0 +1,113 @@
+@page "/book-search"
+@inject SessionState Session
+@inject FakeDataStore Store
+
+<PageTitle>書籍查詢</PageTitle>
+
+<RoleGuard Role="@Roles.User">
+    <FlashMessage @bind-Result="flash" />
+
+    <form class="row g-2 mb-3" @onsubmit="Search" @onsubmit:preventDefault>
+        <div class="col">
+            <input class="form-control" placeholder="書名 / 作者 / 出版社" @bind="keyword" @bind:event="oninput" />
+        </div>
+        <div class="col-auto">
+            <select class="form-select" @bind="categoryId">
+                <option value="0">全部分類</option>
+                @foreach (var c in categories)
+                {
+                    <option value="@c.Id">@c.Name</option>
+                }
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-outline-dark">查詢</button>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>書名</th><th>作者</th><th>出版社</th><th>分類</th><th>數量</th><th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var b in items)
+                {
+                    <tr>
+                        <td>@b.Title</td>
+                        <td>@b.Author</td>
+                        <td>@b.Publisher</td>
+                        <td>@Store.CategoryName(b.CategoryId)</td>
+                        <td>
+                            @if (b.Quantity == 0)
+                            {
+                                <span class="badge text-bg-danger">0</span>
+                            }
+                            else
+                            {
+                                @b.Quantity
+                            }
+                        </td>
+                        <td class="text-end">
+                            @if (b.Quantity == 0)
+                            {
+                                <button class="btn btn-outline-secondary btn-sm" disabled>無庫存</button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-outline-dark btn-sm" @onclick="() => Borrow(b.Id)">借閱</button>
+                            }
+                        </td>
+                    </tr>
+                }
+                @if (items.Count == 0)
+                {
+                    <tr><td colspan="6" class="text-center text-muted py-4">查無符合的書籍</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <Pager Page="page" Total="total" PageChanged="GoPage" />
+</RoleGuard>
+
+@code {
+    private List<Category> categories = new();
+    private List<BookItem> items = new();
+    private string keyword = "";
+    private int categoryId;
+    // 已套用的查詢條件（按「查詢」才套用）
+    private string appliedKeyword = "";
+    private int appliedCategoryId;
+    private int page = 1, total;
+    private Result? flash;
+
+    protected override void OnInitialized()
+    {
+        categories = Store.GetCategories();
+        Load();
+    }
+
+    private void Load()
+    {
+        (items, total) = Store.SearchBooks(appliedKeyword, appliedCategoryId, page);
+    }
+
+    private void Search()
+    {
+        appliedKeyword = keyword;
+        appliedCategoryId = categoryId;
+        page = 1;
+        Load();
+    }
+
+    private void GoPage(int p) { page = p; Load(); }
+
+    private void Borrow(int bookId)
+    {
+        flash = Store.Borrow(Session.User!.Id, bookId);
+        Load();
+    }
+}

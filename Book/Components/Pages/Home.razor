@@ -1,0 +1,10 @@
+﻿@page "/"
+@inject SessionState Session
+@inject NavigationManager Nav
+
+@* 首頁（重導向）：未登入→/login；一般使用者→/book-search；管理員→/book-manage *@
+
+@code {
+    protected override void OnInitialized()
+        => Nav.NavigateTo(Session.IsLoggedIn ? Session.HomePath : "/login", replace: true);
+}

@@ -1,0 +1,35 @@
+@if (TotalPages > 1)
+{
+    <nav class="d-flex justify-content-between align-items-center mt-3">
+        <small class="text-muted">共 @Total 筆，第 @Page / @TotalPages 頁</small>
+        <ul class="pagination pagination-sm mb-0">
+            <li class="page-item @(Page <= 1 ? "disabled" : "")">
+                <button class="page-link" @onclick="() => Go(Page - 1)">上一頁</button>
+            </li>
+            @for (var i = 1; i <= TotalPages; i++)
+            {
+                var p = i;
+                <li class="page-item @(p == Page ? "active" : "")">
+                    <button class="page-link" @onclick="() => Go(p)">@p</button>
+                </li>
+            }
+            <li class="page-item @(Page >= TotalPages ? "disabled" : "")">
+                <button class="page-link" @onclick="() => Go(Page + 1)">下一頁</button>
+            </li>
+        </ul>
+    </nav>
+}
+else if (Total > 0)
+{
+    <small class="text-muted d-block mt-3">共 @Total 筆</small>
+}
+
+@code {
+    [Parameter] public int Page { get; set; } = 1;
+    [Parameter] public int Total { get; set; }
+    [Parameter] public EventCallback<int> PageChanged { get; set; }
+
+    private int TotalPages => (int)Math.Ceiling(Total / (double)BorrowRules.PageSize);
+
+    private Task Go(int p) => p < 1 || p > TotalPages ? Task.CompletedTask : PageChanged.InvokeAsync(p);
+}

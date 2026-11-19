@@ -1,0 +1,194 @@
+@page "/book-manage"
+@using System.ComponentModel.DataAnnotations
+@inject FakeDataStore Store
+
+<PageTitle>書籍管理</PageTitle>
+
+<RoleGuard Role="@Roles.Admin">
+    <FlashMessage @bind-Result="flash" />
+
+    <form class="row g-2 mb-3" @onsubmit="Search" @onsubmit:preventDefault>
+        <div class="col">
+            <input class="form-control" placeholder="書名 / 作者 / 出版社" @bind="keyword" @bind:event="oninput" />
+        </div>
+        <div class="col-auto">
+            <select class="form-select" @bind="categoryId">
+                <option value="0">全部分類</option>
+                @foreach (var c in categories)
+                {
+                    <option value="@c.Id">@c.Name</option>
+                }
+            </select>
+        </div>
+        <div class="col-auto d-flex gap-2">
+            <button type="submit" class="btn btn-outline-dark">查詢</button>
+            <button type="button" class="btn btn-outline-dark" @onclick="OpenAdd">新增書籍</button>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr><th>書名</th><th>作者</th><th>出版社</th><th>分類</th><th>數量</th><th class="text-end">操作</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var b in items)
+                {
+                    <tr>
+                        <td>@b.Title</td>
+                        <td>@b.Author</td>
+                        <td>@b.Publisher</td>
+                        <td>@Store.CategoryName(b.CategoryId)</td>
+                        <td>@b.Quantity</td>
+                        <td class="text-end text-nowrap">
+                            <button class="btn btn-outline-secondary btn-sm" @onclick="() => OpenEdit(b)">編輯</button>
+                            <button class="btn btn-outline-secondary btn-sm" @onclick="() => AskDelete(b)">刪除</button>
+                        </td>
+                    </tr>
+                }
+                @if (items.Count == 0)
+                {
+                    <tr><td colspan="6" class="text-center text-muted py-4">查無符合的書籍</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <Pager Page="page" Total="total" PageChanged="GoPage" />
+
+    @* A2 新增 / 編輯書籍（彈出視窗，編輯時帶入原資料） *@
+    @if (form != null)
+    {
+        <div class="modal-backdrop fade show"></div>
+        <div class="modal d-block" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <EditForm Model="form" OnValidSubmit="Save" FormName="book-form">
+                        <DataAnnotationsValidator />
+                        <div class="modal-body">
+                            <h5 class="mb-3">@(form.Id == 0 ? "新增書籍" : "編輯書籍")</h5>
+
+                            <label class="form-label small text-muted mb-1">書名</label>
+                            <InputText class="form-control" @bind-Value="form.Title" />
+                            <ValidationMessage For="() => form.Title" />
+
+                            <label class="form-label small text-muted mb-1 mt-2">作者</label>
+                            <InputText class="form-control" @bind-Value="form.Author" />
+                            <ValidationMessage For="() => form.Author" />
+
+                            <label class="form-label small text-muted mb-1 mt-2">出版社</label>
+                            <InputText class="form-control" @bind-Value="form.Publisher" />
+                            <ValidationMessage For="() => form.Publisher" />
+
+                            <label class="form-label small text-muted mb-1 mt-2">分類</label>
+                            <InputSelect class="form-select" @bind-Value="form.CategoryId">
+                                @foreach (var c in categories)
+                                {
+                                    <option value="@c.Id">@c.Name</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="() => form.CategoryId" />
+
+                            <label class="form-label small text-muted mb-1 mt-2">數量</label>
+                            <InputNumber class="form-control" @bind-Value="form.Quantity" />
+                            <ValidationMessage For="() => form.Quantity" />
+                        </div>
+                        <div class="modal-footer border-0 pt-0">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="CloseForm">取消</button>
+                            <button type="submit" class="btn btn-outline-dark btn-sm">儲存</button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    }
+
+    <ConfirmModal Show="deleting != null" Name="@(deleting?.Title ?? "")"
+                  OnCancel="() => deleting = null" OnConfirm="ConfirmDelete" />
+</RoleGuard>
+
+@code {
+    private List<Category> categories = new();
+    private List<BookItem> items = new();
+    private string keyword = "";
+    private int categoryId;
+    private string appliedKeyword = "";
+    private int appliedCategoryId;
+    private int page = 1, total;
+    private BookForm? form;
+    private BookItem? deleting;
+    private Result? flash;
+
+    protected override void OnInitialized()
+    {
+        categories = Store.GetCategories();
+        Load();
+    }
+
+    private void Load() => (items, total) = Store.SearchBooks(appliedKeyword, appliedCategoryId, page);
+
+    private void Search()
+    {
+        appliedKeyword = keyword;
+        appliedCategoryId = categoryId;
+        page = 1;
+        Load();
+    }
+
+    private void GoPage(int p) { page = p; Load(); }
+
+    // 新增時數量預設 1，分類預設第一個
+    private void OpenAdd() => form = new() { CategoryId = categories.FirstOrDefault()?.Id ?? 0, Quantity = 1 };
+
+    private void OpenEdit(BookItem b) => form = new()
+    {
+        Id = b.Id, Title = b.Title, Author = b.Author, Publisher = b.Publisher,
+        CategoryId = b.CategoryId, Quantity = b.Quantity,
+    };
+
+    private void CloseForm() => form = null;
+
+    private void Save()
+    {
+        var f = form!;
+        flash = Store.SaveBook(new BookItem
+        {
+            Id = f.Id, Title = f.Title.Trim(), Author = f.Author.Trim(), Publisher = f.Publisher.Trim(),
+            CategoryId = f.CategoryId, Quantity = f.Quantity,
+        });
+        form = null;
+        Load();
+    }
+
+    private void AskDelete(BookItem b) => deleting = b;
+
+    private void ConfirmDelete()
+    {
+        flash = Store.DeleteBook(deleting!.Id);
+        deleting = null;
+        Load();
+    }
+
+    private class BookForm
+    {
+        public int Id { get; set; }
+
+        [Required(ErrorMessage = "請輸入書名")]
+        [StringLength(200, ErrorMessage = "書名最長 200 字元")]
+        public string Title { get; set; } = "";
+
+        [Required(ErrorMessage = "請輸入作者")]
+        [StringLength(100, ErrorMessage = "作者最長 100 字元")]
+        public string Author { get; set; } = "";
+
+        [Required(ErrorMessage = "請輸入出版社")]
+        [StringLength(100, ErrorMessage = "出版社最長 100 字元")]
+        public string Publisher { get; set; } = "";
+
+        [Range(1, int.MaxValue, ErrorMessage = "請選擇分類")]
+        public int CategoryId { get; set; }
+
+        [Range(0, int.MaxValue, ErrorMessage = "數量須為大於或等於 0 的整數")]
+        public int Quantity { get; set; }
+    }
+}

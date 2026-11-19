@@ -1,0 +1,55 @@
+﻿@inherits LayoutComponentBase
+@implements IDisposable
+@inject SessionState Session
+@inject NavigationManager Nav
+
+<div class="app-shell">
+    <div class="app-card">
+        @if (Session.IsLoggedIn)
+        {
+            <nav class="app-nav">
+                <div class="app-tabs">
+                    @if (Session.IsAdmin)
+                    {
+                        <NavLink class="app-tab" href="book-manage">書籍管理</NavLink>
+                        <NavLink class="app-tab" href="borrow-manage">借閱管理</NavLink>
+                        <NavLink class="app-tab" href="user-manage">使用者管理</NavLink>
+                    }
+                    else
+                    {
+                        <NavLink class="app-tab" href="book-search">書籍查詢</NavLink>
+                        <NavLink class="app-tab" href="my-borrow">我的借閱</NavLink>
+                    }
+                </div>
+                <div class="app-user">
+                    <span>@Session.DisplayLabel</span>
+                    <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none text-secondary" @onclick="Logout">登出</button>
+                </div>
+            </nav>
+        }
+
+        <main class="app-content">
+            @Body
+        </main>
+    </div>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    發生未預期的錯誤。
+    <a href="." class="reload">重新載入</a>
+    <span class="dismiss">🗙</span>
+</div>
+
+@code {
+    protected override void OnInitialized() => Session.Changed += OnSessionChanged;
+
+    private void OnSessionChanged() => InvokeAsync(StateHasChanged);
+
+    private void Logout()
+    {
+        Session.SignOut();
+        Nav.NavigateTo("/login");
+    }
+
+    public void Dispose() => Session.Changed -= OnSessionChanged;
+}

@@ -1,0 +1,23 @@
+@* 到期狀態 Banner：數量為 0 的項目不顯示，兩者皆為 0 則不顯示 Banner *@
+@if (DueSoon > 0 || Overdue > 0)
+{
+    <div class="alert alert-warning py-2 mb-3" role="alert">@Text</div>
+}
+
+@code {
+    [Parameter] public int DueSoon { get; set; }
+    [Parameter] public int Overdue { get; set; }
+    /// <summary>使用者頁面加上「，請盡快歸還」；管理員頁面不加。</summary>
+    [Parameter] public bool AskReturn { get; set; }
+
+    private string Text
+    {
+        get
+        {
+            var parts = new List<string>();
+            if (DueSoon > 0) parts.Add($"{DueSoon} 本即將到期");
+            if (Overdue > 0) parts.Add($"{Overdue} 本已逾期");
+            return string.Join("，", parts) + (AskReturn ? "，請盡快歸還" : "");
+        }
+    }
+}

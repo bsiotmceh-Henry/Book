@@ -1,0 +1,26 @@
+@* 刪除確認視窗（書籍與使用者共用，A3） *@
+@if (Show)
+{
+    <div class="modal-backdrop fade show"></div>
+    <div class="modal d-block" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h6 class="mb-1">刪除「@Name」？</h6>
+                    <p class="text-muted small mb-3">刪除後無法復原。仍有未歸還紀錄時不能刪除。</p>
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="OnCancel">取消</button>
+                        <button type="button" class="btn btn-outline-danger btn-sm" @onclick="OnConfirm">刪除</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool Show { get; set; }
+    [Parameter] public string Name { get; set; } = "";
+    [Parameter] public EventCallback OnConfirm { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+}

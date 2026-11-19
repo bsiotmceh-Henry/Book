@@ -1,0 +1,72 @@
+@page "/register"
+@layout AuthLayout
+@using System.ComponentModel.DataAnnotations
+@inject FakeDataStore Store
+@inject NavigationManager Nav
+
+<PageTitle>註冊</PageTitle>
+
+<h1 class="h5 mb-3">註冊</h1>
+
+<EditForm Model="model" OnValidSubmit="Submit" FormName="register">
+    <DataAnnotationsValidator />
+
+    <div class="mb-2">
+        <InputText class="form-control" placeholder="帳號" @bind-Value="model.UserName" autocomplete="username" />
+        <ValidationMessage For="() => model.UserName" />
+    </div>
+    <div class="mb-2">
+        <InputText class="form-control" placeholder="顯示名稱" @bind-Value="model.DisplayName" />
+        <ValidationMessage For="() => model.DisplayName" />
+    </div>
+    <div class="mb-2">
+        <InputText type="password" class="form-control" placeholder="密碼" @bind-Value="model.Password" autocomplete="new-password" />
+        <ValidationMessage For="() => model.Password" />
+    </div>
+    <div class="mb-3">
+        <InputText type="password" class="form-control" placeholder="確認密碼" @bind-Value="model.ConfirmPassword" autocomplete="new-password" />
+        <ValidationMessage For="() => model.ConfirmPassword" />
+    </div>
+
+    @if (error != null)
+    {
+        <div class="alert alert-danger py-2">@error</div>
+    }
+
+    <button type="submit" class="btn btn-outline-dark w-100">建立帳號</button>
+</EditForm>
+
+<p class="text-center text-muted small mt-3 mb-0">已有帳號？<a href="login">登入</a></p>
+
+@code {
+    private RegisterModel model = new();
+    private string? error;
+
+    private void Submit()
+    {
+        var r = Store.Register(model.UserName, model.DisplayName, model.Password);
+        if (!r.Success) { error = r.Message; return; }
+        Nav.NavigateTo("/register-done");
+    }
+
+    private class RegisterModel
+    {
+        [Required(ErrorMessage = "請輸入帳號")]
+        [StringLength(50, MinimumLength = 3, ErrorMessage = "帳號長度需為 3–50 字元")]
+        [RegularExpression("^[A-Za-z0-9_]*$", ErrorMessage = "帳號僅限英數與底線")]
+        public string UserName { get; set; } = "";
+
+        [Required(ErrorMessage = "請輸入顯示名稱")]
+        [StringLength(100, ErrorMessage = "顯示名稱最長 100 字元")]
+        public string DisplayName { get; set; } = "";
+
+        [Required(ErrorMessage = "請輸入密碼")]
+        [MinLength(8, ErrorMessage = "密碼至少 8 碼")]
+        [RegularExpression("^(?=.*[A-Za-z])(?=.*\\d).*$", ErrorMessage = "密碼須包含英文字母與數字")]
+        public string Password { get; set; } = "";
+
+        [Required(ErrorMessage = "請再次輸入密碼")]
+        [Compare(nameof(Password), ErrorMessage = "確認密碼須與密碼一致")]
+        public string ConfirmPassword { get; set; } = "";
+    }
+}

@@ -1,0 +1,5 @@
+<span class="badge @Status.CssClass">@Status.Label</span>
+
+@code {
+    [Parameter, EditorRequired] public BorrowStatus Status { get; set; } = default!;
+}

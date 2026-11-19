@@ -1,0 +1,67 @@
+@page "/login"
+@layout AuthLayout
+@using System.ComponentModel.DataAnnotations
+@inject SessionState Session
+@inject FakeDataStore Store
+@inject NavigationManager Nav
+
+<PageTitle>登入</PageTitle>
+
+<h1 class="h5 mb-3">登入</h1>
+
+<EditForm Model="model" OnValidSubmit="Submit" FormName="login">
+    <DataAnnotationsValidator />
+
+    <div class="mb-2">
+        <InputText class="form-control" placeholder="帳號" @bind-Value="model.UserName" autocomplete="username" />
+        <ValidationMessage For="() => model.UserName" />
+    </div>
+    <div class="mb-3">
+        <InputText type="password" class="form-control" placeholder="密碼" @bind-Value="model.Password" autocomplete="current-password" />
+        <ValidationMessage For="() => model.Password" />
+    </div>
+
+    @if (error != null)
+    {
+        <div class="alert alert-danger py-2">@error</div>
+    }
+
+    <button type="submit" class="btn btn-outline-dark w-100">登入</button>
+</EditForm>
+
+<p class="text-center text-muted small mt-3 mb-0">還沒有帳號？<a href="register">註冊</a></p>
+
+<hr />
+<div class="small text-muted">
+    <div class="fw-semibold mb-1">示範帳號（假資料）</div>
+    <div>管理員：henry / Admin1234</div>
+    <div>一般使用者：amy / User1234、bob / User1234</div>
+</div>
+
+@code {
+    private LoginModel model = new();
+    private string? error;
+
+    protected override void OnInitialized()
+    {
+        if (Session.IsLoggedIn) Nav.NavigateTo(Session.HomePath, replace: true);
+    }
+
+    private void Submit()
+    {
+        var r = Store.Login(model.UserName, model.Password);
+        if (!r.Success)
+        {
+            error = r.Message;   // 失敗一律顯示「帳號或密碼錯誤」（不區分帳號不存在或密碼錯誤）
+            return;
+        }
+        Session.SignIn(r.Value!);
+        Nav.NavigateTo(Session.HomePath);
+    }
+
+    private class LoginModel
+    {
+        [Required(ErrorMessage = "請輸入帳號")] public string UserName { get; set; } = "";
+        [Required(ErrorMessage = "請輸入密碼")] public string Password { get; set; } = "";
+    }
+}
