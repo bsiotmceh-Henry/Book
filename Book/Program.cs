@@ -6,6 +6,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddBootstrapBlazor();
+
 // 假資料與假登入狀態（不連資料庫）
 builder.Services.AddSingleton<Book.Services.FakeDataStore>();
 builder.Services.AddScoped<Book.Services.SessionState>();
