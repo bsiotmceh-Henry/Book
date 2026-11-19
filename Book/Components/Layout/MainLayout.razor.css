@@ -1,34 +1,77 @@
 .app-shell {
     min-height: 100vh;
     background: #f4f5f7;
-    padding: 1.5rem 1rem;
 }
 
-.app-card {
-    max-width: 1000px;
-    margin: 0 auto;
+/* 置頂導覽列 */
+.app-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
     background: #fff;
-    border: 1px solid #dfe2e6;
-    border-radius: .75rem;
+    border-bottom: 1px solid #dfe2e6;
     box-shadow: 0 1px 3px rgba(0, 0, 0, .05);
-    overflow: hidden;
 }
 
 .app-nav {
     display: flex;
-    justify-content: space-between;
+    align-items: stretch;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    height: 56px;
+}
+
+.app-brand {
+    display: flex;
     align-items: center;
-    padding: .75rem 1.5rem 0;
-    border-bottom: 1px solid #eceef0;
+    font-weight: 600;
+    color: #212529;
+    white-space: nowrap;
+}
+
+/* 可摺疊區：桌機為橫向排列，撐滿剩餘寬度 */
+.app-collapse {
+    display: flex;
+    flex: 1;
+    align-items: stretch;
+    gap: 2rem;
 }
 
 .app-tabs {
     display: flex;
-    gap: 1.25rem;
+    gap: 1.5rem;
+    flex: 1;
+}
+
+/* 漢堡按鈕：桌機隱藏 */
+.app-toggler {
+    display: none;
+    margin-left: auto;
+    align-self: center;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 40px;
+    height: 36px;
+    padding: 0 9px;
+    background: transparent;
+    border: 1px solid #dfe2e6;
+    border-radius: .375rem;
+    cursor: pointer;
+}
+
+.app-toggler span {
+    display: block;
+    height: 2px;
+    background: #495057;
+    border-radius: 1px;
 }
 
 .app-nav ::deep .app-tab {
-    padding: .35rem 0 .6rem;
+    display: flex;
+    align-items: center;
     color: #6c757d;
     text-decoration: none;
     border-bottom: 2px solid transparent;
@@ -48,13 +91,76 @@
     display: flex;
     gap: 1rem;
     align-items: center;
-    padding-bottom: .5rem;
     color: #495057;
     font-size: .9rem;
 }
 
+/* 內容區：置中、限制最大寬度 */
 .app-content {
-    padding: 1.25rem 1.5rem 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+/* 手機版：導覽列可摺疊 */
+@media (max-width: 767.98px) {
+    .app-nav {
+        flex-wrap: wrap;
+        height: auto;
+        min-height: 56px;
+        gap: 0;
+        padding: 0 1rem;
+    }
+
+    .app-brand {
+        height: 56px;
+    }
+
+    .app-toggler {
+        display: flex;
+    }
+
+    /* 預設收起，open 時垂直展開 */
+    .app-collapse {
+        display: none;
+        flex: 0 0 100%;
+        flex-direction: column;
+        gap: .25rem;
+        padding: .5rem 0 .75rem;
+        border-top: 1px solid #eceef0;
+    }
+
+    .app-collapse.open {
+        display: flex;
+    }
+
+    .app-tabs {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .app-nav ::deep .app-tab {
+        padding: .65rem 0;
+        border-bottom: 0;
+        border-left: 3px solid transparent;
+        padding-left: .75rem;
+        margin-bottom: 0;
+    }
+
+    .app-nav ::deep .app-tab.active {
+        border-left-color: #212529;
+    }
+
+    .app-user {
+        justify-content: space-between;
+        padding: .65rem .75rem 0;
+        border-top: 1px solid #eceef0;
+        margin-top: .25rem;
+    }
+
+    .app-content {
+        padding: 1rem;
+    }
 }
 
 #blazor-error-ui {

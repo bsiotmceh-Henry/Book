@@ -4,34 +4,46 @@
 @inject NavigationManager Nav
 
 <div class="app-shell">
-    <div class="app-card">
-        @if (Session.IsLoggedIn)
-        {
+    @if (Session.IsLoggedIn)
+    {
+        @* 置頂導覽列：滿版寬度，捲動時固定在上方 *@
+        <header class="app-topbar">
             <nav class="app-nav">
-                <div class="app-tabs">
-                    @if (Session.IsAdmin)
-                    {
-                        <NavLink class="app-tab" href="book-manage">書籍管理</NavLink>
-                        <NavLink class="app-tab" href="borrow-manage">借閱管理</NavLink>
-                        <NavLink class="app-tab" href="user-manage">使用者管理</NavLink>
-                    }
-                    else
-                    {
-                        <NavLink class="app-tab" href="book-search">書籍查詢</NavLink>
-                        <NavLink class="app-tab" href="my-borrow">我的借閱</NavLink>
-                    }
-                </div>
-                <div class="app-user">
-                    <span>@Session.DisplayLabel</span>
-                    <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none text-secondary" @onclick="Logout">登出</button>
+                <span class="app-brand">書本管理系統</span>
+
+                @* 手機版漢堡按鈕（桌機隱藏），純圖示、無文字 *@
+                <button type="button" class="app-toggler" title="切換選單" aria-label="切換選單"
+                        aria-expanded="@_open.ToString().ToLower()" @onclick="() => _open = !_open">
+                    <span></span><span></span><span></span>
+                </button>
+
+                @* 可摺疊區：桌機橫排，手機點漢堡才展開 *@
+                <div class="app-collapse @(_open ? "open" : "")">
+                    <div class="app-tabs">
+                        @if (Session.IsAdmin)
+                        {
+                            <NavLink class="app-tab" href="book-manage" @onclick="CloseMenu">書籍管理</NavLink>
+                            <NavLink class="app-tab" href="borrow-manage" @onclick="CloseMenu">借閱管理</NavLink>
+                            <NavLink class="app-tab" href="user-manage" @onclick="CloseMenu">使用者管理</NavLink>
+                        }
+                        else
+                        {
+                            <NavLink class="app-tab" href="book-search" @onclick="CloseMenu">書籍查詢</NavLink>
+                            <NavLink class="app-tab" href="my-borrow" @onclick="CloseMenu">我的借閱</NavLink>
+                        }
+                    </div>
+                    <div class="app-user">
+                        <span>@Session.DisplayLabel</span>
+                        <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none text-secondary" @onclick="Logout">登出</button>
+                    </div>
                 </div>
             </nav>
-        }
+        </header>
+    }
 
-        <main class="app-content">
-            @Body
-        </main>
-    </div>
+    <main class="app-content">
+        @Body
+    </main>
 </div>
 
 <div id="blazor-error-ui" data-nosnippet>
@@ -41,12 +53,18 @@
 </div>
 
 @code {
+    // 手機版選單是否展開
+    private bool _open;
+
+    private void CloseMenu() => _open = false;
+
     protected override void OnInitialized() => Session.Changed += OnSessionChanged;
 
     private void OnSessionChanged() => InvokeAsync(StateHasChanged);
 
     private void Logout()
     {
+        _open = false;
         Session.SignOut();
         Nav.NavigateTo("/login");
     }
