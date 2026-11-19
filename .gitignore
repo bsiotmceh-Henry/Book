@@ -365,3 +365,4 @@ FodyWeavers.xsd
 
 doc/
 CLAUDE.md
+appsettings.Development.json
