@@ -1,4 +1,6 @@
 using Book.Components;
+using Book.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,7 +10,10 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddBootstrapBlazor();
 
-// 假資料與假登入狀態（不連資料庫）
+builder.Services.AddDbContextFactory<AppDbContext>(opt =>
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// 假資料與假登入狀態（尚未改用資料庫）
 builder.Services.AddSingleton<Book.Services.FakeDataStore>();
 builder.Services.AddScoped<Book.Services.SessionState>();
 
