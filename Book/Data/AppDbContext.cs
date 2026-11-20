@@ -60,5 +60,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         b.Entity<BorrowRecord>()
             .HasOne(x => x.Book).WithMany()
             .OnDelete(DeleteBehavior.Cascade);
+
+        // 預設資料（分類、書籍）
+        b.Entity<Category>().HasData(SeedData.Categories());
+        b.Entity<BookItem>().HasData(SeedData.Books());
     }
 }

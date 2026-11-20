@@ -67,6 +67,514 @@ namespace Book.Data.Migrations
                         {
                             t.HasCheckConstraint("CK_Books_Quantity", "[Quantity] >= 0");
                         });
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Author = "Robert Martin",
+                            CategoryId = 1,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "Prentice Hall",
+                            Quantity = 3,
+                            Title = "Clean Code",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Author = "Silberschatz",
+                            CategoryId = 2,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "McGraw-Hill",
+                            Quantity = 1,
+                            Title = "資料庫系統概念",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Author = "GoF",
+                            CategoryId = 1,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "Addison-Wesley",
+                            Quantity = 0,
+                            Title = "設計模式",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Author = "Andrew Hunt",
+                            CategoryId = 1,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "Addison-Wesley",
+                            Quantity = 2,
+                            Title = "The Pragmatic Programmer",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Author = "Martin Fowler",
+                            CategoryId = 1,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "Addison-Wesley",
+                            Quantity = 2,
+                            Title = "重構",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Author = "Steve McConnell",
+                            CategoryId = 3,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "Microsoft Press",
+                            Quantity = 1,
+                            Title = "Code Complete",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Author = "Frederick Brooks",
+                            CategoryId = 3,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "Addison-Wesley",
+                            Quantity = 4,
+                            Title = "人月神話",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Author = "Alan Beaulieu",
+                            CategoryId = 2,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "O'Reilly",
+                            Quantity = 3,
+                            Title = "SQL 學習指南",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Author = "Baron Schwartz",
+                            CategoryId = 2,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "O'Reilly",
+                            Quantity = 0,
+                            Title = "高效能 MySQL",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Author = "Andrew Stellman",
+                            CategoryId = 1,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "O'Reilly",
+                            Quantity = 5,
+                            Title = "深入淺出 C#",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Author = "Jon Skeet",
+                            CategoryId = 1,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "Manning",
+                            Quantity = 2,
+                            Title = "C# in Depth",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Author = "Andrew Lock",
+                            CategoryId = 1,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "Manning",
+                            Quantity = 3,
+                            Title = "ASP.NET Core in Action",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 13,
+                            Author = "Jon P Smith",
+                            CategoryId = 2,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "Manning",
+                            Quantity = 2,
+                            Title = "Entity Framework Core in Action",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Author = "Eric Evans",
+                            CategoryId = 3,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "Addison-Wesley",
+                            Quantity = 1,
+                            Title = "領域驅動設計",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 15,
+                            Author = "Thomas Cormen",
+                            CategoryId = 1,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "MIT Press",
+                            Quantity = 2,
+                            Title = "演算法導論",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 16,
+                            Author = "Eric Freeman",
+                            CategoryId = 1,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "O'Reilly",
+                            Quantity = 3,
+                            Title = "Head First 設計模式",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 17,
+                            Author = "Robert Martin",
+                            CategoryId = 3,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "Prentice Hall",
+                            Quantity = 2,
+                            Title = "敏捷軟體開發",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 18,
+                            Author = "Roy Osherove",
+                            CategoryId = 3,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "Manning",
+                            Quantity = 1,
+                            Title = "單元測試的藝術",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 19,
+                            Author = "Martin Kleppmann",
+                            CategoryId = 2,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "O'Reilly",
+                            Quantity = 2,
+                            Title = "資料密集型應用系統設計",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 20,
+                            Author = "Itzik Ben-Gan",
+                            CategoryId = 2,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "Microsoft Press",
+                            Quantity = 1,
+                            Title = "SQL Server 效能調校",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 21,
+                            Author = "Robert Martin",
+                            CategoryId = 3,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "Prentice Hall",
+                            Quantity = 3,
+                            Title = "程式設計師的職業素養",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 22,
+                            Author = "Paul Graham",
+                            CategoryId = 4,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "O'Reilly",
+                            Quantity = 2,
+                            Title = "黑客與畫家",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 23,
+                            Author = "James Clear",
+                            CategoryId = 4,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "Avery",
+                            Quantity = 4,
+                            Title = "原子習慣",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 24,
+                            Author = "Robert Martin",
+                            CategoryId = 3,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "Prentice Hall",
+                            Quantity = 2,
+                            Title = "clean Architecture",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 25,
+                            Author = "Chris Sainty",
+                            CategoryId = 1,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "Manning",
+                            Quantity = 2,
+                            Title = "Blazor in Action",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 26,
+                            Author = "David Flanagan",
+                            CategoryId = 1,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "O'Reilly",
+                            Quantity = 3,
+                            Title = "JavaScript 權威指南",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 27,
+                            Author = "Kyle Simpson",
+                            CategoryId = 1,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "O'Reilly",
+                            Quantity = 1,
+                            Title = "你不知道的 JS",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 28,
+                            Author = "Eric Matthes",
+                            CategoryId = 1,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "No Starch",
+                            Quantity = 6,
+                            Title = "Python 程式設計入門",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 29,
+                            Author = "William Shotts",
+                            CategoryId = 4,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "No Starch",
+                            Quantity = 2,
+                            Title = "Linux 指令大全",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 30,
+                            Author = "Behrouz Forouzan",
+                            CategoryId = 4,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "McGraw-Hill",
+                            Quantity = 3,
+                            Title = "計算機概論",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 31,
+                            Author = "Silberschatz",
+                            CategoryId = 4,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "Wiley",
+                            Quantity = 2,
+                            Title = "作業系統概念",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 32,
+                            Author = "Andrew Tanenbaum",
+                            CategoryId = 4,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "Pearson",
+                            Quantity = 1,
+                            Title = "電腦網路",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 33,
+                            Author = "Alfred Aho",
+                            CategoryId = 1,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "Pearson",
+                            Quantity = 0,
+                            Title = "編譯器設計",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 34,
+                            Author = "Mark Weiss",
+                            CategoryId = 1,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "Pearson",
+                            Quantity = 3,
+                            Title = "資料結構與演算法",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 35,
+                            Author = "Mark Richards",
+                            CategoryId = 3,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "O'Reilly",
+                            Quantity = 2,
+                            Title = "軟體架構學習指南",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 36,
+                            Author = "Sam Newman",
+                            CategoryId = 3,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "O'Reilly",
+                            Quantity = 2,
+                            Title = "微服務架構設計",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 37,
+                            Author = "Sean Kane",
+                            CategoryId = 4,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "O'Reilly",
+                            Quantity = 4,
+                            Title = "Docker 技術入門",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 38,
+                            Author = "Marko Luksa",
+                            CategoryId = 4,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "Manning",
+                            Quantity = 1,
+                            Title = "Kubernetes 實戰",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 39,
+                            Author = "Scott Chacon",
+                            CategoryId = 3,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "Apress",
+                            Quantity = 5,
+                            Title = "Git 版本控制",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 40,
+                            Author = "Bill Wagner",
+                            CategoryId = 1,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "Addison-Wesley",
+                            Quantity = 2,
+                            Title = "Effective C#",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 41,
+                            Author = "Martin Fowler",
+                            CategoryId = 2,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "Addison-Wesley",
+                            Quantity = 2,
+                            Title = "NoSQL 精粹",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 42,
+                            Author = "Josiah Carlson",
+                            CategoryId = 2,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "Manning",
+                            Quantity = 1,
+                            Title = "Redis 實戰",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 43,
+                            Author = "Michael Hernandez",
+                            CategoryId = 2,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "Addison-Wesley",
+                            Quantity = 3,
+                            Title = "資料庫設計入門",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 44,
+                            Author = "Don Norman",
+                            CategoryId = 4,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "Basic Books",
+                            Quantity = 2,
+                            Title = "UX 設計心理學",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 45,
+                            Author = "Eric Ries",
+                            CategoryId = 4,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "Crown",
+                            Quantity = 3,
+                            Title = "精實創業",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 46,
+                            Author = "Jeff Sutherland",
+                            CategoryId = 3,
+                            CreateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Publisher = "Crown",
+                            Quantity = 2,
+                            Title = "Scrum 敏捷專案管理",
+                            UpdateAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        });
                 });
 
             modelBuilder.Entity("Book.Data.BorrowRecord", b =>
@@ -125,6 +633,32 @@ namespace Book.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("Categories");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "程式設計",
+                            Sort = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "資料庫",
+                            Sort = 2
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "軟體工程",
+                            Sort = 3
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "其他",
+                            Sort = 4
+                        });
                 });
 
             modelBuilder.Entity("Book.Data.BookItem", b =>
