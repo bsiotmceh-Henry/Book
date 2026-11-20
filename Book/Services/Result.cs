@@ -1,4 +1,4 @@
-namespace Book.Models;
+namespace Book.Services;
 
 /// <summary>業務規則結果（以 Result 回傳，不以例外控制流程）。</summary>
 public record Result(bool Success, string Message)

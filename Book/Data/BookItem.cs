@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-namespace Book.Models;
+namespace Book.Data;
 
 /// <summary>書籍（類別名稱用 BookItem，避免與根命名空間 Book 衝突）。</summary>
 [Table("Books")]

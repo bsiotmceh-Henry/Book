@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-namespace Book.Models;
+namespace Book.Data;
 
 /// <summary>書籍分類。名稱唯一。</summary>
 [Table("Categories")]

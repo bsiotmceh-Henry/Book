@@ -1,4 +1,4 @@
-namespace Book.Models;
+namespace Book.Common;
 
 public static class Roles
 {

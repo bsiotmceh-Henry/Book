@@ -1,4 +1,7 @@
-namespace Book.Models;
+using Book.Common;
+using Book.Data;
+
+namespace Book.Services;
 
 /// <summary>借閱紀錄 + 顯示用的書名與借閱人。</summary>
 public record BorrowRow(BorrowRecord Record, string BookTitle, string BorrowerName);

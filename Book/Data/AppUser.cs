@@ -1,4 +1,6 @@
-namespace Book.Models;
+using Book.Common;
+
+namespace Book.Data;
 
 /// <summary>使用者（目前為假資料；導入 Identity 後改由 Identity 管理）。</summary>
 public class AppUser

@@ -1,4 +1,4 @@
-namespace Book.Models;
+namespace Book.Common;
 
 /// <summary>借閱規則常數（依文件：不使用設定檔）。</summary>
 public static class BorrowRules

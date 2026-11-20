@@ -1,4 +1,3 @@
-using Book.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Book.Data;

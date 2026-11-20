@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-namespace Book.Models;
+namespace Book.Data;
 
 /// <summary>借閱紀錄。狀態（剩 N 天 / 逾期）不存欄位，由 BorrowStatus 計算。</summary>
 [Table("BorrowRecords")]
