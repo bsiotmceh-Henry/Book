@@ -13,6 +13,38 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<BookItem> Books => Set<BookItem>();
     public DbSet<BorrowRecord> BorrowRecords => Set<BorrowRecord>();
 
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        StampBooks();
+        return base.SaveChanges(acceptAllChangesOnSuccess);
+    }
+
+    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    {
+        StampBooks();
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+    /// <summary>儲存前自動填入書籍的 CreateAt（新增）與 UpdateAt（新增、修改）。</summary>
+    private void StampBooks()
+    {
+        var now = DateTime.UtcNow;
+        foreach (var e in ChangeTracker.Entries<BookItem>())
+        {
+            if (e.State == EntityState.Added)
+            {
+                e.Entity.CreateAt = now;
+                e.Entity.UpdateAt = now;
+            }
+            else if (e.State == EntityState.Modified)
+            {
+                // 建立時間不可被修改
+                e.Property(x => x.CreateAt).IsModified = false;
+                e.Entity.UpdateAt = now;
+            }
+        }
+    }
+
     protected override void OnModelCreating(ModelBuilder b)
     {
         // 庫存不可為負（對應 UPDATE ... WHERE Quantity > 0）

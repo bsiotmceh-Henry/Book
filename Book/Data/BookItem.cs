@@ -25,7 +25,10 @@ public class BookItem
 
     public int Quantity { get; set; }
 
-    /// <summary>導覽屬性（僅供 EF 建立外鍵，業務程式不使用）。</summary>
+    public DateTime CreateAt { get; set; }
+
+    public DateTime UpdateAt { get; set; }
+
     public Category? Category { get; set; }
 
     public BookItem Clone() => (BookItem)MemberwiseClone();
