@@ -1,5 +1,6 @@
 using Book.Components;
 using Book.Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,11 +14,24 @@ builder.Services.AddBootstrapBlazor();
 builder.Services.AddDbContextFactory<AppDbContext>(opt =>
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Identity：使用者 + 角色，存於 AppDbContext
+builder.Services.AddIdentityCore<ApplicationUser>(opt =>
+    {
+        opt.Password.RequiredLength = 8;
+        opt.Password.RequireNonAlphanumeric = false;
+        opt.User.RequireUniqueEmail = false;
+    })
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<AppDbContext>();
+
 // 假資料與假登入狀態（尚未改用資料庫）
 builder.Services.AddSingleton<Book.Services.FakeDataStore>();
 builder.Services.AddScoped<Book.Services.SessionState>();
 
 var app = builder.Build();
+
+// 建立預設管理員
+await IdentitySeeder.SeedAsync(app.Services);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

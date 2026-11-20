@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Identity;
+
 namespace Book.Data;
 
 /// <summary>
@@ -9,6 +11,13 @@ public static class SeedData
 {
     /// <summary>種子資料的固定建立時間（UTC）。</summary>
     private static readonly DateTime SeedTime = new(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+    /// <summary>預設角色。NormalizedName 必須自行填入大寫，HasData 不會經過 RoleManager。</summary>
+    public static IdentityRole[] Roles() =>
+    [
+        new() { Id = "role-admin", Name = Common.Roles.Admin, NormalizedName = Common.Roles.Admin.ToUpperInvariant(), ConcurrencyStamp = "role-admin-stamp" },
+        new() { Id = "role-user", Name = Common.Roles.User, NormalizedName = Common.Roles.User.ToUpperInvariant(), ConcurrencyStamp = "role-user-stamp" },
+    ];
 
     public static Category[] Categories() =>
     [
