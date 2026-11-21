@@ -1,23 +1,16 @@
+@* 分頁元件：包裝 BootstrapBlazor 的 Pagination，維持原本 Page / Total / PageChanged 介面，呼叫端不用改 *@
 @if (TotalPages > 1)
 {
-    <nav class="d-flex justify-content-between align-items-center mt-3">
-        <small class="text-muted">共 @Total 筆，第 @Page / @TotalPages 頁</small>
-        <ul class="pagination pagination-sm mb-0">
-            <li class="page-item @(Page <= 1 ? "disabled" : "")">
-                <button class="page-link" @onclick="() => Go(Page - 1)">上一頁</button>
-            </li>
-            @for (var i = 1; i <= TotalPages; i++)
-            {
-                var p = i;
-                <li class="page-item @(p == Page ? "active" : "")">
-                    <button class="page-link" @onclick="() => Go(p)">@p</button>
-                </li>
-            }
-            <li class="page-item @(Page >= TotalPages ? "disabled" : "")">
-                <button class="page-link" @onclick="() => Go(Page + 1)">下一頁</button>
-            </li>
-        </ul>
-    </nav>
+    <div class="mt-3">
+        <Pagination PageIndex="Page"
+                    PageCount="TotalPages"
+                    PrevPageIcon="bi bi-chevron-left"
+                    NextPageIcon="bi bi-chevron-right"
+                    PrevEllipsisPageIcon="bi bi-chevron-double-left"
+                    NextEllipsisPageIcon="bi bi-chevron-double-right"
+                    PageInfoText="@($"共 {Total} 筆，第 {Page} / {TotalPages} 頁")"
+                    OnPageLinkClick="Go" />
+    </div>
 }
 else if (Total > 0)
 {
@@ -29,7 +22,9 @@ else if (Total > 0)
     [Parameter] public int Total { get; set; }
     [Parameter] public EventCallback<int> PageChanged { get; set; }
 
+    // 總頁數：依固定每頁筆數換算
     private int TotalPages => (int)Math.Ceiling(Total / (double)BorrowRules.PageSize);
 
+    // 頁碼點擊：超出範圍忽略，否則通知父層換頁
     private Task Go(int p) => p < 1 || p > TotalPages ? Task.CompletedTask : PageChanged.InvokeAsync(p);
 }
