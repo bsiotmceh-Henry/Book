@@ -56,52 +56,48 @@
 
 <Pager Page="page" Total="total" PageChanged="GoPage" />
 
-@* A2 新增 / 編輯書籍（彈出視窗，編輯時帶入原資料） *@
-@if (form != null)
-{
-    <div class="modal-backdrop fade show"></div>
-    <div class="modal d-block" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <EditForm Model="form" OnValidSubmit="Save" FormName="book-form">
+@* A2 新增 / 編輯書籍（BootstrapBlazor Modal，編輯時帶入原資料） *@
+<Modal @ref="formModal" OnCloseAsync="OnFormClosed">
+    <ModalDialog Title="@(form?.Id == 0 ? "新增書籍" : "編輯書籍")" IsCentered="true" Size="Size.Medium" ShowFooter="true" ShowCloseButton="false" ShowSaveButton="false">
+        <BodyTemplate>
+            @if (form != null)
+            {
+                <EditForm id="book-form" Model="form" OnValidSubmit="Save" FormName="book-form">
                     <DataAnnotationsValidator />
-                    <div class="modal-body">
-                        <h5 class="mb-3">@(form.Id == 0 ? "新增書籍" : "編輯書籍")</h5>
 
-                        <label class="form-label small text-muted mb-1">書名</label>
-                        <InputText class="form-control" @bind-Value="form.Title" />
-                        <ValidationMessage For="() => form.Title" />
+                    <label class="form-label small text-muted mb-1">書名</label>
+                    <InputText class="form-control" @bind-Value="form.Title" />
+                    <ValidationMessage For="() => form.Title" />
 
-                        <label class="form-label small text-muted mb-1 mt-2">作者</label>
-                        <InputText class="form-control" @bind-Value="form.Author" />
-                        <ValidationMessage For="() => form.Author" />
+                    <label class="form-label small text-muted mb-1 mt-2">作者</label>
+                    <InputText class="form-control" @bind-Value="form.Author" />
+                    <ValidationMessage For="() => form.Author" />
 
-                        <label class="form-label small text-muted mb-1 mt-2">出版社</label>
-                        <InputText class="form-control" @bind-Value="form.Publisher" />
-                        <ValidationMessage For="() => form.Publisher" />
+                    <label class="form-label small text-muted mb-1 mt-2">出版社</label>
+                    <InputText class="form-control" @bind-Value="form.Publisher" />
+                    <ValidationMessage For="() => form.Publisher" />
 
-                        <label class="form-label small text-muted mb-1 mt-2">分類</label>
-                        <InputSelect class="form-select" @bind-Value="form.CategoryId">
-                            @foreach (var c in categories)
-                            {
-                                <option value="@c.Id">@c.Name</option>
-                            }
-                        </InputSelect>
-                        <ValidationMessage For="() => form.CategoryId" />
+                    <label class="form-label small text-muted mb-1 mt-2">分類</label>
+                    <InputSelect class="form-select" @bind-Value="form.CategoryId">
+                        @foreach (var c in categories)
+                        {
+                            <option value="@c.Id">@c.Name</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="() => form.CategoryId" />
 
-                        <label class="form-label small text-muted mb-1 mt-2">數量</label>
-                        <InputNumber class="form-control" @bind-Value="form.Quantity" />
-                        <ValidationMessage For="() => form.Quantity" />
-                    </div>
-                    <div class="modal-footer border-0 pt-0">
-                        <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="CloseForm">取消</button>
-                        <button type="submit" class="btn btn-outline-dark btn-sm">儲存</button>
-                    </div>
+                    <label class="form-label small text-muted mb-1 mt-2">數量</label>
+                    <InputNumber class="form-control" @bind-Value="form.Quantity" />
+                    <ValidationMessage For="() => form.Quantity" />
                 </EditForm>
-            </div>
-        </div>
-    </div>
-}
+            }
+        </BodyTemplate>
+        <FooterTemplate>
+            <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="CloseForm">取消</button>
+            <button type="submit" form="book-form" class="btn btn-dark btn-sm">儲存</button>
+        </FooterTemplate>
+    </ModalDialog>
+</Modal>
 
 <ConfirmModal Show="deleting != null" Name="@(deleting?.Title ?? "")"
               OnCancel="() => deleting = null" OnConfirm="ConfirmDelete" />
@@ -115,6 +111,7 @@
     private int appliedCategoryId;
     private int page = 1, total;
     private BookForm? form;
+    private Modal? formModal;
     private BookItem? deleting;
     private Result? flash;
 
@@ -137,15 +134,30 @@
     private async Task GoPage(int p) { page = p; await Load(); }
 
     // 新增時數量預設 1，分類預設第一個
-    private void OpenAdd() => form = new() { CategoryId = categories.FirstOrDefault()?.Id ?? 0, Quantity = 1 };
-
-    private void OpenEdit(BookItem b) => form = new()
+    private async Task OpenAdd()
     {
-        Id = b.Id, Title = b.Title, Author = b.Author, Publisher = b.Publisher,
-        CategoryId = b.CategoryId, Quantity = b.Quantity,
-    };
+        form = new() { CategoryId = categories.FirstOrDefault()?.Id ?? 0, Quantity = 1 };
+        await formModal!.Show();
+    }
 
-    private void CloseForm() => form = null;
+    private async Task OpenEdit(BookItem b)
+    {
+        form = new()
+        {
+            Id = b.Id, Title = b.Title, Author = b.Author, Publisher = b.Publisher,
+            CategoryId = b.CategoryId, Quantity = b.Quantity,
+        };
+        await formModal!.Show();
+    }
+
+    private async Task CloseForm() => await formModal!.Close();
+
+    // Modal 關閉（取消 / X / Esc / 點背景）後清掉表單狀態
+    private Task OnFormClosed()
+    {
+        form = null;
+        return Task.CompletedTask;
+    }
 
     private async Task Save()
     {
@@ -155,7 +167,7 @@
             Id = f.Id, Title = f.Title.Trim(), Author = f.Author.Trim(), Publisher = f.Publisher.Trim(),
             CategoryId = f.CategoryId, Quantity = f.Quantity,
         });
-        form = null;
+        await formModal!.Close();
         await Load();
     }
 

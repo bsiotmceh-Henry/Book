@@ -43,7 +43,10 @@
     </AuthorizeView>
 
     <main class="app-content">
-        @Body
+        @* BootstrapBlazor 根元件：Modal 等元件需要它提供的 JS 與服務環境 *@
+        <BootstrapBlazorRoot>
+            @Body
+        </BootstrapBlazorRoot>
     </main>
 </div>
 

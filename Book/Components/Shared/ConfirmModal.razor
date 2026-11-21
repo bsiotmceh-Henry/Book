@@ -1,26 +1,47 @@
-@* 刪除確認視窗（書籍與使用者共用，A3） *@
-@if (Show)
-{
-    <div class="modal-backdrop fade show"></div>
-    <div class="modal d-block" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <h6 class="mb-1">刪除「@Name」？</h6>
-                    <p class="text-muted small mb-3">刪除後無法復原。仍有未歸還紀錄時不能刪除。</p>
-                    <div class="d-flex justify-content-end gap-2">
-                        <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="OnCancel">取消</button>
-                        <button type="button" class="btn btn-outline-danger btn-sm" @onclick="OnConfirm">刪除</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-}
+@* 刪除確認視窗（書籍與使用者共用，A3）：包裝 BootstrapBlazor Modal，維持 Show / Name / OnConfirm / OnCancel 介面 *@
+<Modal @ref="modal" OnCloseAsync="HandleClosed">
+    <ModalDialog Title="確認刪除" IsCentered="true" Size="Size.Small" ShowFooter="true" ShowCloseButton="false" ShowSaveButton="false">
+        <BodyTemplate>
+            <div class="fw-semibold mb-1">刪除「@lastName」？</div>
+            <div class="text-muted small">刪除後無法復原。仍有未歸還紀錄時不能刪除。</div>
+        </BodyTemplate>
+        <FooterTemplate>
+            <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="OnCancel">取消</button>
+            <button type="button" class="btn btn-danger btn-sm" @onclick="OnConfirm">刪除</button>
+        </FooterTemplate>
+    </ModalDialog>
+</Modal>
 
 @code {
     [Parameter] public bool Show { get; set; }
     [Parameter] public string Name { get; set; } = "";
     [Parameter] public EventCallback OnConfirm { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
+
+    private Modal? modal;
+
+    // 目前 Modal 實際是否開啟；保留最後一次的名稱，避免關閉動畫期間文字消失
+    private bool opened;
+    private string lastName = "";
+
+    protected override void OnParametersSet()
+    {
+        if (Show) lastName = Name;
+    }
+
+    // 依 Show 同步 Modal 開關（Modal 需轉譯完成後才能呼叫）
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (modal == null || Show == opened) return;
+        opened = Show;
+        if (Show) await modal.Show();
+        else await modal.Close();
+    }
+
+    // 使用者按右上角 X、Esc 或點背景關閉：視同取消
+    private async Task HandleClosed()
+    {
+        opened = false;
+        if (Show) await OnCancel.InvokeAsync();
+    }
 }

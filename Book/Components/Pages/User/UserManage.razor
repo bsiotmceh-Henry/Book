@@ -30,48 +30,44 @@
 </div>
 <p class="text-muted small">新使用者由使用者自行註冊，管理員不另提供新增使用者。</p>
 
-@* A6 編輯使用者（彈出視窗） *@
-@if (editing != null)
-{
-    <div class="modal-backdrop fade show"></div>
-    <div class="modal d-block" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <EditForm Model="editing" OnValidSubmit="SaveEdit" FormName="edit-user">
+@* A6 編輯使用者（BootstrapBlazor Modal） *@
+<Modal @ref="editModal" OnCloseAsync="OnEditClosed">
+    <ModalDialog Title="編輯使用者" IsCentered="true" Size="Size.Medium" ShowFooter="true" ShowCloseButton="false" ShowSaveButton="false">
+        <BodyTemplate>
+            @if (editing != null)
+            {
+                <EditForm id="edit-user-form" Model="editing" OnValidSubmit="SaveEdit" FormName="edit-user">
                     <DataAnnotationsValidator />
-                    <div class="modal-body">
-                        <h5 class="mb-3">編輯使用者</h5>
 
-                        <label class="form-label small text-muted mb-1">帳號</label>
-                        <input class="form-control mb-2" value="@editing.UserName" readonly disabled />
+                    <label class="form-label small text-muted mb-1">帳號</label>
+                    <input class="form-control mb-2" value="@editing.UserName" readonly disabled />
 
-                        <label class="form-label small text-muted mb-1">顯示名稱</label>
-                        <InputText class="form-control" @bind-Value="editing.DisplayName" />
-                        <ValidationMessage For="() => editing.DisplayName" />
+                    <label class="form-label small text-muted mb-1">顯示名稱</label>
+                    <InputText class="form-control" @bind-Value="editing.DisplayName" />
+                    <ValidationMessage For="() => editing.DisplayName" />
 
-                        <label class="form-label small text-muted mb-1 mt-2">角色</label>
-                        <InputSelect class="form-select" @bind-Value="editing.Role">
-                            <option value="@Roles.Admin">管理員</option>
-                            <option value="@Roles.User">一般使用者</option>
-                        </InputSelect>
+                    <label class="form-label small text-muted mb-1 mt-2">角色</label>
+                    <InputSelect class="form-select" @bind-Value="editing.Role">
+                        <option value="@Roles.Admin">管理員</option>
+                        <option value="@Roles.User">一般使用者</option>
+                    </InputSelect>
 
-                        <label class="form-label small text-muted mb-1 mt-2">重設密碼（不改請留空）</label>
-                        <InputText type="password" class="form-control" @bind-Value="editing.NewPassword" autocomplete="new-password" />
+                    <label class="form-label small text-muted mb-1 mt-2">重設密碼（不改請留空）</label>
+                    <InputText type="password" class="form-control" @bind-Value="editing.NewPassword" autocomplete="new-password" />
 
-                        @if (modalError != null)
-                        {
-                            <div class="alert alert-danger py-2 mt-3 mb-0">@modalError</div>
-                        }
-                    </div>
-                    <div class="modal-footer border-0 pt-0">
-                        <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="CloseEdit">取消</button>
-                        <button type="submit" class="btn btn-outline-dark btn-sm">儲存</button>
-                    </div>
+                    @if (modalError != null)
+                    {
+                        <div class="alert alert-danger py-2 mt-3 mb-0">@modalError</div>
+                    }
                 </EditForm>
-            </div>
-        </div>
-    </div>
-}
+            }
+        </BodyTemplate>
+        <FooterTemplate>
+            <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="CloseEdit">取消</button>
+            <button type="submit" form="edit-user-form" class="btn btn-dark btn-sm">儲存</button>
+        </FooterTemplate>
+    </ModalDialog>
+</Modal>
 
 <ConfirmModal Show="deleting != null" Name="@(deleting?.DisplayName ?? "")"
               OnCancel="() => deleting = null" OnConfirm="ConfirmDelete" />
@@ -84,6 +80,7 @@
 
     private List<AppUser> users = new();
     private EditUserModel? editing;
+    private Modal? editModal;
     private AppUser? deleting;
     private string? modalError;
     private Result? flash;
@@ -92,13 +89,21 @@
 
     private async Task Load() => users = await Users.GetUsersAsync();
 
-    private void OpenEdit(AppUser u)
+    private async Task OpenEdit(AppUser u)
     {
         modalError = null;
         editing = new() { Id = u.Id, UserName = u.UserName, DisplayName = u.DisplayName, Role = u.Role };
+        await editModal!.Show();
     }
 
-    private void CloseEdit() => editing = null;
+    private async Task CloseEdit() => await editModal!.Close();
+
+    // Modal 關閉（取消 / X / Esc / 點背景）後清掉編輯狀態
+    private Task OnEditClosed()
+    {
+        editing = null;
+        return Task.CompletedTask;
+    }
 
     private async Task SaveEdit()
     {
@@ -112,7 +117,7 @@
         var r = await Users.UpdateUserAsync(e.Id, e.DisplayName, e.Role, e.NewPassword, await CurrentUserId());
         if (!r.Success) { modalError = r.Message; return; }
         flash = r;
-        editing = null;
+        await editModal!.Close();
         await Load();
     }
 
