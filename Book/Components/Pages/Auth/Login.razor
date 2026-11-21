@@ -2,7 +2,7 @@
 @layout AuthLayout
 @using System.ComponentModel.DataAnnotations
 @inject SessionState Session
-@inject FakeDataStore Store
+@inject UserService Users
 @inject NavigationManager Nav
 
 <PageTitle>登入</PageTitle>
@@ -31,13 +31,6 @@
 
 <p class="text-center text-muted small mt-3 mb-0">還沒有帳號？<a href="register">註冊</a></p>
 
-<hr />
-<div class="small text-muted">
-    <div class="fw-semibold mb-1">示範帳號（假資料）</div>
-    <div>管理員：henry / Admin1234</div>
-    <div>一般使用者：amy / User1234、bob / User1234</div>
-</div>
-
 @code {
     private LoginModel model = new();
     private string? error;
@@ -47,9 +40,9 @@
         if (Session.IsLoggedIn) Nav.NavigateTo(Session.HomePath, replace: true);
     }
 
-    private void Submit()
+    private async Task Submit()
     {
-        var r = Store.Login(model.UserName, model.Password);
+        var r = await Users.LoginAsync(model.UserName, model.Password);
         if (!r.Success)
         {
             error = r.Message;   // 失敗一律顯示「帳號或密碼錯誤」（不區分帳號不存在或密碼錯誤）

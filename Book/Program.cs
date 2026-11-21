@@ -19,13 +19,20 @@ builder.Services.AddIdentityCore<ApplicationUser>(opt =>
     {
         opt.Password.RequiredLength = 8;
         opt.Password.RequireNonAlphanumeric = false;
+        // 密碼規則：至少 8 碼、含英文字母與數字（大小寫不限）
+        opt.Password.RequireUppercase = false;
+        opt.Password.RequireLowercase = false;
         opt.User.RequireUniqueEmail = false;
+        // 連續失敗 5 次鎖定 5 分鐘
+        opt.Lockout.MaxFailedAccessAttempts = 5;
+        opt.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
     })
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>();
 
-// 假資料與假登入狀態（尚未改用資料庫）
-builder.Services.AddSingleton<Book.Services.FakeDataStore>();
+// 業務邏輯（資料庫）與每個 circuit 一份的登入狀態
+builder.Services.AddSingleton<Book.Services.BookService>();
+builder.Services.AddSingleton<Book.Services.UserService>();
 builder.Services.AddScoped<Book.Services.SessionState>();
 
 var app = builder.Build();

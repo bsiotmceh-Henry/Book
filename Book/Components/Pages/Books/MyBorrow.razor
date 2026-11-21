@@ -1,6 +1,6 @@
 @page "/my-borrow"
 @inject SessionState Session
-@inject FakeDataStore Store
+@inject BookService Books
 
 <PageTitle>我的借閱</PageTitle>
 
@@ -46,19 +46,19 @@
     private int dueSoon, overdue;
     private Result? flash;
 
-    protected override void OnInitialized() => Load();
+    protected override async Task OnInitializedAsync() => await Load();
 
-    private void Load()
+    private async Task Load()
     {
         if (!Session.IsLoggedIn) return;
         var id = Session.User!.Id;
-        rows = Store.GetUserRecords(id);
-        (dueSoon, overdue) = Store.CountDue(id);
+        rows = await Books.GetUserRecordsAsync(id);
+        (dueSoon, overdue) = await Books.CountDueAsync(id);
     }
 
-    private void Return(int recordId)
+    private async Task Return(int recordId)
     {
-        flash = Store.Return(recordId, Session.User!.Id);
-        Load();
+        flash = await Books.ReturnAsync(recordId, Session.User!.Id);
+        await Load();
     }
 }

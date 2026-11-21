@@ -1,7 +1,7 @@
 @page "/register"
 @layout AuthLayout
 @using System.ComponentModel.DataAnnotations
-@inject FakeDataStore Store
+@inject UserService Users
 @inject NavigationManager Nav
 
 <PageTitle>註冊</PageTitle>
@@ -42,9 +42,9 @@
     private RegisterModel model = new();
     private string? error;
 
-    private void Submit()
+    private async Task Submit()
     {
-        var r = Store.Register(model.UserName, model.DisplayName, model.Password);
+        var r = await Users.RegisterAsync(model.UserName, model.DisplayName, model.Password);
         if (!r.Success) { error = r.Message; return; }
         Nav.NavigateTo("/register-done");
     }

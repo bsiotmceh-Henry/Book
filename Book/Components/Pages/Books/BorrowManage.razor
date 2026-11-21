@@ -1,5 +1,5 @@
 @page "/borrow-manage"
-@inject FakeDataStore Store
+@inject BookService Books
 
 <PageTitle>借閱管理</PageTitle>
 
@@ -58,14 +58,14 @@
     private List<BorrowRow> rows = new();
     private int page = 1, total, dueSoon, overdue;
 
-    protected override void OnInitialized() => Load();
+    protected override async Task OnInitializedAsync() => await Load();
 
-    private void Load()
+    private async Task Load()
     {
-        (rows, total) = Store.GetAllRecords(filter, page);
-        (dueSoon, overdue) = Store.CountDue(null);
+        (rows, total) = await Books.GetAllRecordsAsync(filter, page);
+        (dueSoon, overdue) = await Books.CountDueAsync(null);
     }
 
-    private void SetFilter(BorrowFilter f) { filter = f; page = 1; Load(); }
-    private void GoPage(int p) { page = p; Load(); }
+    private async Task SetFilter(BorrowFilter f) { filter = f; page = 1; await Load(); }
+    private async Task GoPage(int p) { page = p; await Load(); }
 }

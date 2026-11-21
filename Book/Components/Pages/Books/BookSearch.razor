@@ -1,6 +1,6 @@
 @page "/book-search"
 @inject SessionState Session
-@inject FakeDataStore Store
+@inject BookService Books
 
 <PageTitle>書籍查詢</PageTitle>
 
@@ -39,7 +39,7 @@
                         <td>@b.Title</td>
                         <td>@b.Author</td>
                         <td>@b.Publisher</td>
-                        <td>@Store.CategoryName(b.CategoryId)</td>
+                        <td>@b.Category?.Name</td>
                         <td>
                             @if (b.Quantity == 0)
                             {
@@ -84,30 +84,30 @@
     private int page = 1, total;
     private Result? flash;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        categories = Store.GetCategories();
-        Load();
+        categories = await Books.GetCategoriesAsync();
+        await Load();
     }
 
-    private void Load()
+    private async Task Load()
     {
-        (items, total) = Store.SearchBooks(appliedKeyword, appliedCategoryId, page);
+        (items, total) = await Books.SearchBooksAsync(appliedKeyword, appliedCategoryId, page);
     }
 
-    private void Search()
+    private async Task Search()
     {
         appliedKeyword = keyword;
         appliedCategoryId = categoryId;
         page = 1;
-        Load();
+        await Load();
     }
 
-    private void GoPage(int p) { page = p; Load(); }
+    private async Task GoPage(int p) { page = p; await Load(); }
 
-    private void Borrow(int bookId)
+    private async Task Borrow(int bookId)
     {
-        flash = Store.Borrow(Session.User!.Id, bookId);
-        Load();
+        flash = await Books.BorrowAsync(Session.User!.Id, bookId);
+        await Load();
     }
 }

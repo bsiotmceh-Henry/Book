@@ -1,6 +1,6 @@
 @page "/book-manage"
 @using System.ComponentModel.DataAnnotations
-@inject FakeDataStore Store
+@inject BookService Books
 
 <PageTitle>書籍管理</PageTitle>
 
@@ -38,7 +38,7 @@
                         <td>@b.Title</td>
                         <td>@b.Author</td>
                         <td>@b.Publisher</td>
-                        <td>@Store.CategoryName(b.CategoryId)</td>
+                        <td>@b.Category?.Name</td>
                         <td>@b.Quantity</td>
                         <td class="text-end text-nowrap">
                             <button class="btn btn-outline-secondary btn-sm" @onclick="() => OpenEdit(b)">編輯</button>
@@ -119,23 +119,23 @@
     private BookItem? deleting;
     private Result? flash;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        categories = Store.GetCategories();
-        Load();
+        categories = await Books.GetCategoriesAsync();
+        await Load();
     }
 
-    private void Load() => (items, total) = Store.SearchBooks(appliedKeyword, appliedCategoryId, page);
+    private async Task Load() => (items, total) = await Books.SearchBooksAsync(appliedKeyword, appliedCategoryId, page);
 
-    private void Search()
+    private async Task Search()
     {
         appliedKeyword = keyword;
         appliedCategoryId = categoryId;
         page = 1;
-        Load();
+        await Load();
     }
 
-    private void GoPage(int p) { page = p; Load(); }
+    private async Task GoPage(int p) { page = p; await Load(); }
 
     // 新增時數量預設 1，分類預設第一個
     private void OpenAdd() => form = new() { CategoryId = categories.FirstOrDefault()?.Id ?? 0, Quantity = 1 };
@@ -148,25 +148,25 @@
 
     private void CloseForm() => form = null;
 
-    private void Save()
+    private async Task Save()
     {
         var f = form!;
-        flash = Store.SaveBook(new BookItem
+        flash = await Books.SaveBookAsync(new BookItem
         {
             Id = f.Id, Title = f.Title.Trim(), Author = f.Author.Trim(), Publisher = f.Publisher.Trim(),
             CategoryId = f.CategoryId, Quantity = f.Quantity,
         });
         form = null;
-        Load();
+        await Load();
     }
 
     private void AskDelete(BookItem b) => deleting = b;
 
-    private void ConfirmDelete()
+    private async Task ConfirmDelete()
     {
-        flash = Store.DeleteBook(deleting!.Id);
+        flash = await Books.DeleteBookAsync(deleting!.Id);
         deleting = null;
-        Load();
+        await Load();
     }
 
     private class BookForm
