@@ -1,111 +1,110 @@
 @page "/book-manage"
+@attribute [Authorize(Roles = Roles.Admin)]
 @using System.ComponentModel.DataAnnotations
 @inject BookService Books
 
 <PageTitle>書籍管理</PageTitle>
 
-<RoleGuard Role="@Roles.Admin">
-    <FlashMessage @bind-Result="flash" />
+<FlashMessage @bind-Result="flash" />
 
-    <form class="row g-2 mb-3" @onsubmit="Search" @onsubmit:preventDefault>
-        <div class="col">
-            <input class="form-control" placeholder="書名 / 作者 / 出版社" @bind="keyword" @bind:event="oninput" />
-        </div>
-        <div class="col-auto">
-            <select class="form-select" @bind="categoryId">
-                <option value="0">全部分類</option>
-                @foreach (var c in categories)
-                {
-                    <option value="@c.Id">@c.Name</option>
-                }
-            </select>
-        </div>
-        <div class="col-auto d-flex gap-2">
-            <button type="submit" class="btn btn-outline-dark">查詢</button>
-            <button type="button" class="btn btn-outline-dark" @onclick="OpenAdd">新增書籍</button>
-        </div>
-    </form>
-
-    <div class="table-responsive">
-        <table class="table align-middle">
-            <thead>
-                <tr><th>書名</th><th>作者</th><th>出版社</th><th>分類</th><th>數量</th><th class="text-end">操作</th></tr>
-            </thead>
-            <tbody>
-                @foreach (var b in items)
-                {
-                    <tr>
-                        <td>@b.Title</td>
-                        <td>@b.Author</td>
-                        <td>@b.Publisher</td>
-                        <td>@b.Category?.Name</td>
-                        <td>@b.Quantity</td>
-                        <td class="text-end text-nowrap">
-                            <button class="btn btn-outline-secondary btn-sm" @onclick="() => OpenEdit(b)">編輯</button>
-                            <button class="btn btn-outline-secondary btn-sm" @onclick="() => AskDelete(b)">刪除</button>
-                        </td>
-                    </tr>
-                }
-                @if (items.Count == 0)
-                {
-                    <tr><td colspan="6" class="text-center text-muted py-4">查無符合的書籍</td></tr>
-                }
-            </tbody>
-        </table>
+<form class="row g-2 mb-3" @onsubmit="Search" @onsubmit:preventDefault>
+    <div class="col">
+        <input class="form-control" placeholder="書名 / 作者 / 出版社" @bind="keyword" @bind:event="oninput" />
     </div>
+    <div class="col-auto">
+        <select class="form-select" @bind="categoryId">
+            <option value="0">全部分類</option>
+            @foreach (var c in categories)
+            {
+                <option value="@c.Id">@c.Name</option>
+            }
+        </select>
+    </div>
+    <div class="col-auto d-flex gap-2">
+        <button type="submit" class="btn btn-outline-dark">查詢</button>
+        <button type="button" class="btn btn-outline-dark" @onclick="OpenAdd">新增書籍</button>
+    </div>
+</form>
 
-    <Pager Page="page" Total="total" PageChanged="GoPage" />
+<div class="table-responsive">
+    <table class="table align-middle">
+        <thead>
+            <tr><th>書名</th><th>作者</th><th>出版社</th><th>分類</th><th>數量</th><th class="text-end">操作</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var b in items)
+            {
+                <tr>
+                    <td>@b.Title</td>
+                    <td>@b.Author</td>
+                    <td>@b.Publisher</td>
+                    <td>@b.Category?.Name</td>
+                    <td>@b.Quantity</td>
+                    <td class="text-end text-nowrap">
+                        <button class="btn btn-outline-secondary btn-sm" @onclick="() => OpenEdit(b)">編輯</button>
+                        <button class="btn btn-outline-secondary btn-sm" @onclick="() => AskDelete(b)">刪除</button>
+                    </td>
+                </tr>
+            }
+            @if (items.Count == 0)
+            {
+                <tr><td colspan="6" class="text-center text-muted py-4">查無符合的書籍</td></tr>
+            }
+        </tbody>
+    </table>
+</div>
 
-    @* A2 新增 / 編輯書籍（彈出視窗，編輯時帶入原資料） *@
-    @if (form != null)
-    {
-        <div class="modal-backdrop fade show"></div>
-        <div class="modal d-block" tabindex="-1" role="dialog">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <EditForm Model="form" OnValidSubmit="Save" FormName="book-form">
-                        <DataAnnotationsValidator />
-                        <div class="modal-body">
-                            <h5 class="mb-3">@(form.Id == 0 ? "新增書籍" : "編輯書籍")</h5>
+<Pager Page="page" Total="total" PageChanged="GoPage" />
 
-                            <label class="form-label small text-muted mb-1">書名</label>
-                            <InputText class="form-control" @bind-Value="form.Title" />
-                            <ValidationMessage For="() => form.Title" />
+@* A2 新增 / 編輯書籍（彈出視窗，編輯時帶入原資料） *@
+@if (form != null)
+{
+    <div class="modal-backdrop fade show"></div>
+    <div class="modal d-block" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <EditForm Model="form" OnValidSubmit="Save" FormName="book-form">
+                    <DataAnnotationsValidator />
+                    <div class="modal-body">
+                        <h5 class="mb-3">@(form.Id == 0 ? "新增書籍" : "編輯書籍")</h5>
 
-                            <label class="form-label small text-muted mb-1 mt-2">作者</label>
-                            <InputText class="form-control" @bind-Value="form.Author" />
-                            <ValidationMessage For="() => form.Author" />
+                        <label class="form-label small text-muted mb-1">書名</label>
+                        <InputText class="form-control" @bind-Value="form.Title" />
+                        <ValidationMessage For="() => form.Title" />
 
-                            <label class="form-label small text-muted mb-1 mt-2">出版社</label>
-                            <InputText class="form-control" @bind-Value="form.Publisher" />
-                            <ValidationMessage For="() => form.Publisher" />
+                        <label class="form-label small text-muted mb-1 mt-2">作者</label>
+                        <InputText class="form-control" @bind-Value="form.Author" />
+                        <ValidationMessage For="() => form.Author" />
 
-                            <label class="form-label small text-muted mb-1 mt-2">分類</label>
-                            <InputSelect class="form-select" @bind-Value="form.CategoryId">
-                                @foreach (var c in categories)
-                                {
-                                    <option value="@c.Id">@c.Name</option>
-                                }
-                            </InputSelect>
-                            <ValidationMessage For="() => form.CategoryId" />
+                        <label class="form-label small text-muted mb-1 mt-2">出版社</label>
+                        <InputText class="form-control" @bind-Value="form.Publisher" />
+                        <ValidationMessage For="() => form.Publisher" />
 
-                            <label class="form-label small text-muted mb-1 mt-2">數量</label>
-                            <InputNumber class="form-control" @bind-Value="form.Quantity" />
-                            <ValidationMessage For="() => form.Quantity" />
-                        </div>
-                        <div class="modal-footer border-0 pt-0">
-                            <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="CloseForm">取消</button>
-                            <button type="submit" class="btn btn-outline-dark btn-sm">儲存</button>
-                        </div>
-                    </EditForm>
-                </div>
+                        <label class="form-label small text-muted mb-1 mt-2">分類</label>
+                        <InputSelect class="form-select" @bind-Value="form.CategoryId">
+                            @foreach (var c in categories)
+                            {
+                                <option value="@c.Id">@c.Name</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="() => form.CategoryId" />
+
+                        <label class="form-label small text-muted mb-1 mt-2">數量</label>
+                        <InputNumber class="form-control" @bind-Value="form.Quantity" />
+                        <ValidationMessage For="() => form.Quantity" />
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="CloseForm">取消</button>
+                        <button type="submit" class="btn btn-outline-dark btn-sm">儲存</button>
+                    </div>
+                </EditForm>
             </div>
         </div>
-    }
+    </div>
+}
 
-    <ConfirmModal Show="deleting != null" Name="@(deleting?.Title ?? "")"
-                  OnCancel="() => deleting = null" OnConfirm="ConfirmDelete" />
-</RoleGuard>
+<ConfirmModal Show="deleting != null" Name="@(deleting?.Title ?? "")"
+              OnCancel="() => deleting = null" OnConfirm="ConfirmDelete" />
 
 @code {
     private List<Category> categories = new();

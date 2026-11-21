@@ -1,7 +1,9 @@
 @page "/login"
 @layout AuthLayout
+@attribute [ExcludeFromInteractiveRouting]
 @using System.ComponentModel.DataAnnotations
-@inject SessionState Session
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
 @inject UserService Users
 @inject NavigationManager Nav
 
@@ -32,12 +34,16 @@
 <p class="text-center text-muted small mt-3 mb-0">還沒有帳號？<a href="register">註冊</a></p>
 
 @code {
-    private LoginModel model = new();
+    // 靜態 SSR：表單 POST 回本頁，於伺服器寫入 Cookie
+    [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
+    [SupplyParameterFromForm] private LoginModel model { get; set; } = new();
+    [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
     private string? error;
 
     protected override void OnInitialized()
     {
-        if (Session.IsLoggedIn) Nav.NavigateTo(Session.HomePath, replace: true);
+        if (HttpContext.User.Identity?.IsAuthenticated == true)
+            Nav.NavigateTo(HttpContext.User.HomePath(), replace: true);
     }
 
     private async Task Submit()
@@ -48,8 +54,16 @@
             error = r.Message;   // 失敗一律顯示「帳號或密碼錯誤」（不區分帳號不存在或密碼錯誤）
             return;
         }
-        Session.SignIn(r.Value!);
-        Nav.NavigateTo(Session.HomePath);
+
+        var principal = r.Value!.ToPrincipal();
+        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+        // 只接受站內相對路徑，避免 open redirect
+        var path = ReturnUrl?.TrimStart('/') ?? "";
+        var target = path.Length > 0 && !path.Contains("//") && !path.Contains(':') && !path.Contains('\\')
+            ? "/" + path
+            : principal.HomePath();
+        Nav.NavigateTo(target);
     }
 
     private class LoginModel

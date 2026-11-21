@@ -1,5 +1,8 @@
+using Book.Common;
 using Book.Components;
 using Book.Data;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,7 +36,38 @@ builder.Services.AddIdentityCore<ApplicationUser>(opt =>
 // 業務邏輯（資料庫）與每個 circuit 一份的登入狀態
 builder.Services.AddSingleton<Book.Services.BookService>();
 builder.Services.AddSingleton<Book.Services.UserService>();
-builder.Services.AddScoped<Book.Services.SessionState>();
+
+// Cookie 驗證：登入在靜態 SSR 的 /login 頁面寫入 Cookie，登出走 /auth/logout
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(opt =>
+    {
+        opt.LoginPath = "/login";
+        opt.Cookie.Name = "Book.Auth";
+        opt.Cookie.HttpOnly = true;
+        opt.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+        opt.Cookie.SameSite = SameSiteMode.Lax;
+        opt.ExpireTimeSpan = TimeSpan.FromHours(8);
+        opt.SlidingExpiration = true;
+        // 每次請求確認帳號仍有效；角色以資料庫為準，異動後下次請求生效
+        opt.Events.OnValidatePrincipal = async ctx =>
+        {
+            var users = ctx.HttpContext.RequestServices.GetRequiredService<Book.Services.UserService>();
+            var current = await users.GetActiveUserAsync(ctx.Principal?.UserId() ?? "");
+            if (current == null)
+            {
+                ctx.RejectPrincipal();
+                await ctx.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            }
+            else if (current.Role != ctx.Principal!.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value
+                     || current.DisplayName != ctx.Principal.DisplayName())
+            {
+                ctx.ReplacePrincipal(current.ToPrincipal());
+                ctx.ShouldRenew = true;
+            }
+        };
+    });
+builder.Services.AddAuthorization();
+builder.Services.AddCascadingAuthenticationState();
 
 var app = builder.Build();
 
@@ -50,9 +84,19 @@ if (!app.Environment.IsDevelopment())
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseAntiforgery();
 
 app.MapStaticAssets();
+
+// 登出：清除 Cookie 後回登入頁（純 HTML form POST，互動頁面取不到防偽權杖，故略過驗證；登出被偽造的影響極小）
+app.MapPost("/auth/logout", async (HttpContext ctx) =>
+{
+    await ctx.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+    return Results.Redirect("/login");
+}).DisableAntiforgery();
+
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 

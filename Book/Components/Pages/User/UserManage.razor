@@ -1,84 +1,87 @@
 @page "/user-manage"
+@attribute [Authorize(Roles = Roles.Admin)]
 @using System.ComponentModel.DataAnnotations
-@inject SessionState Session
 @inject UserService Users
 
 <PageTitle>使用者管理</PageTitle>
 
-<RoleGuard Role="@Roles.Admin">
-    <FlashMessage @bind-Result="flash" />
+<FlashMessage @bind-Result="flash" />
 
-    <div class="table-responsive">
-        <table class="table align-middle">
-            <thead>
-                <tr><th>帳號</th><th>顯示名稱</th><th>角色</th><th class="text-end">操作</th></tr>
-            </thead>
-            <tbody>
-                @foreach (var u in users)
-                {
-                    <tr>
-                        <td>@u.UserName</td>
-                        <td>@u.DisplayName</td>
-                        <td><span class="badge @(u.Role == Roles.Admin ? "text-bg-dark" : "text-bg-secondary")">@Roles.Label(u.Role)</span></td>
-                        <td class="text-end text-nowrap">
-                            <button class="btn btn-outline-secondary btn-sm" @onclick="() => OpenEdit(u)">編輯</button>
-                            <button class="btn btn-outline-secondary btn-sm" @onclick="() => AskDelete(u)">刪除</button>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-    <p class="text-muted small">新使用者由使用者自行註冊，管理員不另提供新增使用者。</p>
+<div class="table-responsive">
+    <table class="table align-middle">
+        <thead>
+            <tr><th>帳號</th><th>顯示名稱</th><th>角色</th><th class="text-end">操作</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var u in users)
+            {
+                <tr>
+                    <td>@u.UserName</td>
+                    <td>@u.DisplayName</td>
+                    <td><span class="badge @(u.Role == Roles.Admin ? "text-bg-dark" : "text-bg-secondary")">@Roles.Label(u.Role)</span></td>
+                    <td class="text-end text-nowrap">
+                        <button class="btn btn-outline-secondary btn-sm" @onclick="() => OpenEdit(u)">編輯</button>
+                        <button class="btn btn-outline-secondary btn-sm" @onclick="() => AskDelete(u)">刪除</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<p class="text-muted small">新使用者由使用者自行註冊，管理員不另提供新增使用者。</p>
 
-    @* A6 編輯使用者（彈出視窗） *@
-    @if (editing != null)
-    {
-        <div class="modal-backdrop fade show"></div>
-        <div class="modal d-block" tabindex="-1" role="dialog">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <EditForm Model="editing" OnValidSubmit="SaveEdit" FormName="edit-user">
-                        <DataAnnotationsValidator />
-                        <div class="modal-body">
-                            <h5 class="mb-3">編輯使用者</h5>
+@* A6 編輯使用者（彈出視窗） *@
+@if (editing != null)
+{
+    <div class="modal-backdrop fade show"></div>
+    <div class="modal d-block" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <EditForm Model="editing" OnValidSubmit="SaveEdit" FormName="edit-user">
+                    <DataAnnotationsValidator />
+                    <div class="modal-body">
+                        <h5 class="mb-3">編輯使用者</h5>
 
-                            <label class="form-label small text-muted mb-1">帳號</label>
-                            <input class="form-control mb-2" value="@editing.UserName" readonly disabled />
+                        <label class="form-label small text-muted mb-1">帳號</label>
+                        <input class="form-control mb-2" value="@editing.UserName" readonly disabled />
 
-                            <label class="form-label small text-muted mb-1">顯示名稱</label>
-                            <InputText class="form-control" @bind-Value="editing.DisplayName" />
-                            <ValidationMessage For="() => editing.DisplayName" />
+                        <label class="form-label small text-muted mb-1">顯示名稱</label>
+                        <InputText class="form-control" @bind-Value="editing.DisplayName" />
+                        <ValidationMessage For="() => editing.DisplayName" />
 
-                            <label class="form-label small text-muted mb-1 mt-2">角色</label>
-                            <InputSelect class="form-select" @bind-Value="editing.Role">
-                                <option value="@Roles.Admin">管理員</option>
-                                <option value="@Roles.User">一般使用者</option>
-                            </InputSelect>
+                        <label class="form-label small text-muted mb-1 mt-2">角色</label>
+                        <InputSelect class="form-select" @bind-Value="editing.Role">
+                            <option value="@Roles.Admin">管理員</option>
+                            <option value="@Roles.User">一般使用者</option>
+                        </InputSelect>
 
-                            <label class="form-label small text-muted mb-1 mt-2">重設密碼（不改請留空）</label>
-                            <InputText type="password" class="form-control" @bind-Value="editing.NewPassword" autocomplete="new-password" />
+                        <label class="form-label small text-muted mb-1 mt-2">重設密碼（不改請留空）</label>
+                        <InputText type="password" class="form-control" @bind-Value="editing.NewPassword" autocomplete="new-password" />
 
-                            @if (modalError != null)
-                            {
-                                <div class="alert alert-danger py-2 mt-3 mb-0">@modalError</div>
-                            }
-                        </div>
-                        <div class="modal-footer border-0 pt-0">
-                            <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="CloseEdit">取消</button>
-                            <button type="submit" class="btn btn-outline-dark btn-sm">儲存</button>
-                        </div>
-                    </EditForm>
-                </div>
+                        @if (modalError != null)
+                        {
+                            <div class="alert alert-danger py-2 mt-3 mb-0">@modalError</div>
+                        }
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="CloseEdit">取消</button>
+                        <button type="submit" class="btn btn-outline-dark btn-sm">儲存</button>
+                    </div>
+                </EditForm>
             </div>
         </div>
-    }
+    </div>
+}
 
-    <ConfirmModal Show="deleting != null" Name="@(deleting?.DisplayName ?? "")"
-                  OnCancel="() => deleting = null" OnConfirm="ConfirmDelete" />
-</RoleGuard>
+<ConfirmModal Show="deleting != null" Name="@(deleting?.DisplayName ?? "")"
+              OnCancel="() => deleting = null" OnConfirm="ConfirmDelete" />
 
 @code {
+    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
+
+    /// <summary>目前登入者的使用者 Id（來自 Cookie 身分）。</summary>
+    private async Task<string> CurrentUserId() => (await AuthState).User.UserId();
+
     private List<AppUser> users = new();
     private EditUserModel? editing;
     private AppUser? deleting;
@@ -106,7 +109,7 @@
             modalError = "密碼至少 8 碼，且須包含英文字母與數字";
             return;
         }
-        var r = await Users.UpdateUserAsync(e.Id, e.DisplayName, e.Role, e.NewPassword, Session.User!.Id);
+        var r = await Users.UpdateUserAsync(e.Id, e.DisplayName, e.Role, e.NewPassword, await CurrentUserId());
         if (!r.Success) { modalError = r.Message; return; }
         flash = r;
         editing = null;
@@ -117,7 +120,7 @@
 
     private async Task ConfirmDelete()
     {
-        flash = await Users.DeleteUserAsync(deleting!.Id, Session.User!.Id);
+        flash = await Users.DeleteUserAsync(deleting!.Id, await CurrentUserId());
         deleting = null;
         await Load();
     }

@@ -1,79 +1,82 @@
 @page "/book-search"
-@inject SessionState Session
+@attribute [Authorize(Roles = Roles.User)]
 @inject BookService Books
 
 <PageTitle>書籍查詢</PageTitle>
 
-<RoleGuard Role="@Roles.User">
-    <FlashMessage @bind-Result="flash" />
+<FlashMessage @bind-Result="flash" />
 
-    <form class="row g-2 mb-3" @onsubmit="Search" @onsubmit:preventDefault>
-        <div class="col">
-            <input class="form-control" placeholder="書名 / 作者 / 出版社" @bind="keyword" @bind:event="oninput" />
-        </div>
-        <div class="col-auto">
-            <select class="form-select" @bind="categoryId">
-                <option value="0">全部分類</option>
-                @foreach (var c in categories)
-                {
-                    <option value="@c.Id">@c.Name</option>
-                }
-            </select>
-        </div>
-        <div class="col-auto">
-            <button type="submit" class="btn btn-outline-dark">查詢</button>
-        </div>
-    </form>
-
-    <div class="table-responsive">
-        <table class="table align-middle">
-            <thead>
-                <tr>
-                    <th>書名</th><th>作者</th><th>出版社</th><th>分類</th><th>數量</th><th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var b in items)
-                {
-                    <tr>
-                        <td>@b.Title</td>
-                        <td>@b.Author</td>
-                        <td>@b.Publisher</td>
-                        <td>@b.Category?.Name</td>
-                        <td>
-                            @if (b.Quantity == 0)
-                            {
-                                <span class="badge text-bg-danger">0</span>
-                            }
-                            else
-                            {
-                                @b.Quantity
-                            }
-                        </td>
-                        <td class="text-end">
-                            @if (b.Quantity == 0)
-                            {
-                                <button class="btn btn-outline-secondary btn-sm" disabled>無庫存</button>
-                            }
-                            else
-                            {
-                                <button class="btn btn-outline-dark btn-sm" @onclick="() => Borrow(b.Id)">借閱</button>
-                            }
-                        </td>
-                    </tr>
-                }
-                @if (items.Count == 0)
-                {
-                    <tr><td colspan="6" class="text-center text-muted py-4">查無符合的書籍</td></tr>
-                }
-            </tbody>
-        </table>
+<form class="row g-2 mb-3" @onsubmit="Search" @onsubmit:preventDefault>
+    <div class="col">
+        <input class="form-control" placeholder="書名 / 作者 / 出版社" @bind="keyword" @bind:event="oninput" />
     </div>
+    <div class="col-auto">
+        <select class="form-select" @bind="categoryId">
+            <option value="0">全部分類</option>
+            @foreach (var c in categories)
+            {
+                <option value="@c.Id">@c.Name</option>
+            }
+        </select>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-outline-dark">查詢</button>
+    </div>
+</form>
 
-    <Pager Page="page" Total="total" PageChanged="GoPage" />
-</RoleGuard>
+<div class="table-responsive">
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th>書名</th><th>作者</th><th>出版社</th><th>分類</th><th>數量</th><th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var b in items)
+            {
+                <tr>
+                    <td>@b.Title</td>
+                    <td>@b.Author</td>
+                    <td>@b.Publisher</td>
+                    <td>@b.Category?.Name</td>
+                    <td>
+                        @if (b.Quantity == 0)
+                        {
+                            <span class="badge text-bg-danger">0</span>
+                        }
+                        else
+                        {
+                            @b.Quantity
+                        }
+                    </td>
+                    <td class="text-end">
+                        @if (b.Quantity == 0)
+                        {
+                            <button class="btn btn-outline-secondary btn-sm" disabled>無庫存</button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-outline-dark btn-sm" @onclick="() => Borrow(b.Id)">借閱</button>
+                        }
+                    </td>
+                </tr>
+            }
+            @if (items.Count == 0)
+            {
+                <tr><td colspan="6" class="text-center text-muted py-4">查無符合的書籍</td></tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<Pager Page="page" Total="total" PageChanged="GoPage" />
 
 @code {
+    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
+
+    /// <summary>目前登入者的使用者 Id（來自 Cookie 身分）。</summary>
+    private async Task<string> CurrentUserId() => (await AuthState).User.UserId();
+
     private List<Category> categories = new();
     private List<BookItem> items = new();
     private string keyword = "";
@@ -107,7 +110,7 @@
 
     private async Task Borrow(int bookId)
     {
-        flash = await Books.BorrowAsync(Session.User!.Id, bookId);
+        flash = await Books.BorrowAsync(await CurrentUserId(), bookId);
         await Load();
     }
 }

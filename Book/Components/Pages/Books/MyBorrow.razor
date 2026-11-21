@@ -1,46 +1,49 @@
 @page "/my-borrow"
-@inject SessionState Session
+@attribute [Authorize(Roles = Roles.User)]
 @inject BookService Books
 
 <PageTitle>我的借閱</PageTitle>
 
-<RoleGuard Role="@Roles.User">
-    <FlashMessage @bind-Result="flash" />
-    <DueBanner DueSoon="dueSoon" Overdue="overdue" AskReturn="true" />
+<FlashMessage @bind-Result="flash" />
+<DueBanner DueSoon="dueSoon" Overdue="overdue" AskReturn="true" />
 
-    <div class="table-responsive">
-        <table class="table align-middle">
-            <thead>
-                <tr><th>書名</th><th>借出</th><th>應還</th><th>歸還</th><th>狀態</th><th></th></tr>
-            </thead>
-            <tbody>
-                @foreach (var row in rows)
-                {
-                    var r = row.Record;
-                    <tr>
-                        <td>@row.BookTitle</td>
-                        <td>@r.BorrowedAt.ToString("MM/dd")</td>
-                        <td>@r.DueDate.ToString("MM/dd")</td>
-                        <td>@(r.ReturnedAt?.ToString("MM/dd") ?? "—")</td>
-                        <td><StatusBadge Status="BorrowStatus.Of(r, today)" /></td>
-                        <td class="text-end">
-                            @if (r.ReturnedAt == null)
-                            {
-                                <button class="btn btn-outline-dark btn-sm" @onclick="() => Return(r.Id)">歸還</button>
-                            }
-                        </td>
-                    </tr>
-                }
-                @if (rows.Count == 0)
-                {
-                    <tr><td colspan="6" class="text-center text-muted py-4">目前沒有借閱紀錄</td></tr>
-                }
-            </tbody>
-        </table>
-    </div>
-</RoleGuard>
+<div class="table-responsive">
+    <table class="table align-middle">
+        <thead>
+            <tr><th>書名</th><th>借出</th><th>應還</th><th>歸還</th><th>狀態</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var row in rows)
+            {
+                var r = row.Record;
+                <tr>
+                    <td>@row.BookTitle</td>
+                    <td>@r.BorrowedAt.ToString("MM/dd")</td>
+                    <td>@r.DueDate.ToString("MM/dd")</td>
+                    <td>@(r.ReturnedAt?.ToString("MM/dd") ?? "—")</td>
+                    <td><StatusBadge Status="BorrowStatus.Of(r, today)" /></td>
+                    <td class="text-end">
+                        @if (r.ReturnedAt == null)
+                        {
+                            <button class="btn btn-outline-dark btn-sm" @onclick="() => Return(r.Id)">歸還</button>
+                        }
+                    </td>
+                </tr>
+            }
+            @if (rows.Count == 0)
+            {
+                <tr><td colspan="6" class="text-center text-muted py-4">目前沒有借閱紀錄</td></tr>
+            }
+        </tbody>
+    </table>
+</div>
 
 @code {
+    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
+
+    /// <summary>目前登入者的使用者 Id（來自 Cookie 身分）。</summary>
+    private async Task<string> CurrentUserId() => (await AuthState).User.UserId();
+
     private readonly DateTime today = DateTime.Today;
     private List<BorrowRow> rows = new();
     private int dueSoon, overdue;
@@ -50,15 +53,14 @@
 
     private async Task Load()
     {
-        if (!Session.IsLoggedIn) return;
-        var id = Session.User!.Id;
+        var id = await CurrentUserId();
         rows = await Books.GetUserRecordsAsync(id);
         (dueSoon, overdue) = await Books.CountDueAsync(id);
     }
 
     private async Task Return(int recordId)
     {
-        flash = await Books.ReturnAsync(recordId, Session.User!.Id);
+        flash = await Books.ReturnAsync(recordId, await CurrentUserId());
         await Load();
     }
 }

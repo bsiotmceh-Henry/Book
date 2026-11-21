@@ -37,6 +37,19 @@ public class UserService(IServiceScopeFactory scopeFactory)
         return Result<AppUser>.Ok(await ToAppUserAsync(um, u));
     }
 
+    /// <summary>
+    /// 驗證 Cookie 內的身分是否仍有效：帳號存在、未刪除、未鎖定，並回傳最新的資料（角色異動立即生效）。
+    /// 無效回傳 null。
+    /// </summary>
+    public async Task<AppUser?> GetActiveUserAsync(string userId)
+    {
+        using var scope = scopeFactory.CreateScope();
+        var um = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var u = await um.FindByIdAsync(userId);
+        if (u == null || u.Status != UserStatus.Active || await um.IsLockedOutAsync(u)) return null;
+        return await ToAppUserAsync(um, u);
+    }
+
     public async Task<Result> RegisterAsync(string userName, string displayName, string password)
     {
         using var scope = scopeFactory.CreateScope();

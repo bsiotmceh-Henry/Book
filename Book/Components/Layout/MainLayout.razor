@@ -1,11 +1,8 @@
 ﻿@inherits LayoutComponentBase
-@implements IDisposable
-@inject SessionState Session
-@inject NavigationManager Nav
 
 <div class="app-shell">
-    @if (Session.IsLoggedIn)
-    {
+    <AuthorizeView>
+        <Authorized>
         @* 置頂導覽列：滿版寬度，捲動時固定在上方 *@
         <header class="app-topbar">
             <nav class="app-nav">
@@ -20,7 +17,7 @@
                 @* 可摺疊區：桌機橫排，手機點漢堡才展開 *@
                 <div class="app-collapse @(_open ? "open" : "")">
                     <div class="app-tabs">
-                        @if (Session.IsAdmin)
+                        @if (context.User.IsAdmin())
                         {
                             <NavLink class="app-tab" href="book-manage" @onclick="CloseMenu">書籍管理</NavLink>
                             <NavLink class="app-tab" href="borrow-manage" @onclick="CloseMenu">借閱管理</NavLink>
@@ -33,13 +30,17 @@
                         }
                     </div>
                     <div class="app-user">
-                        <span>@Session.DisplayLabel</span>
-                        <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none text-secondary" @onclick="Logout">登出</button>
+                        <span>@context.User.DisplayLabel()</span>
+                        @* 純 HTML form POST，由伺服器清除 Cookie *@
+                        <form method="post" action="/auth/logout" class="d-inline">
+                            <button type="submit" class="btn btn-link btn-sm p-0 text-decoration-none text-secondary">登出</button>
+                        </form>
                     </div>
                 </div>
             </nav>
         </header>
-    }
+        </Authorized>
+    </AuthorizeView>
 
     <main class="app-content">
         @Body
@@ -57,17 +58,4 @@
     private bool _open;
 
     private void CloseMenu() => _open = false;
-
-    protected override void OnInitialized() => Session.Changed += OnSessionChanged;
-
-    private void OnSessionChanged() => InvokeAsync(StateHasChanged);
-
-    private void Logout()
-    {
-        _open = false;
-        Session.SignOut();
-        Nav.NavigateTo("/login");
-    }
-
-    public void Dispose() => Session.Changed -= OnSessionChanged;
 }

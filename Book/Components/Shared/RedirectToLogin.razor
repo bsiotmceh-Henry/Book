@@ -1,0 +1,7 @@
+@inject NavigationManager Nav
+
+@code {
+    // 登入頁為靜態 SSR，需整頁載入；帶上原網址登入後返回
+    protected override void OnInitialized()
+        => Nav.NavigateTo($"/login?returnUrl={Uri.EscapeDataString(Nav.ToBaseRelativePath(Nav.Uri))}", forceLoad: true);
+}

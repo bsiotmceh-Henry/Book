@@ -1,10 +1,15 @@
-﻿@page "/"
-@inject SessionState Session
+@page "/"
 @inject NavigationManager Nav
 
 @* 首頁（重導向）：未登入→/login；一般使用者→/book-search；管理員→/book-manage *@
 
 @code {
-    protected override void OnInitialized()
-        => Nav.NavigateTo(Session.IsLoggedIn ? Session.HomePath : "/login", replace: true);
+    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await AuthState).User;
+        if (user.Identity?.IsAuthenticated == true) Nav.NavigateTo(user.HomePath(), replace: true);
+        else Nav.NavigateTo("/login", forceLoad: true);
+    }
 }
