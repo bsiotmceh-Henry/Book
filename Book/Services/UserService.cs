@@ -100,6 +100,16 @@ public class UserService(IServiceScopeFactory scopeFactory)
         var u = await um.FindByIdAsync(id);
         if (u == null || u.Status != UserStatus.Active) return Result.Fail("找不到此使用者");
 
+        // 先驗證新密碼，任何資料都還沒改；否則後面移除舊密碼後才發現新密碼不合規則，帳號會變成沒有密碼
+        if (!string.IsNullOrEmpty(newPassword))
+        {
+            foreach (var validator in um.PasswordValidators)
+            {
+                var vr = await validator.ValidateAsync(um, u, newPassword);
+                if (!vr.Succeeded) return Fail(vr);
+            }
+        }
+
         u.DisplayName = displayName.Trim();
         var upd = await um.UpdateAsync(u);
         if (!upd.Succeeded) return Fail(upd);
