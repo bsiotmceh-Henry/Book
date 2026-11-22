@@ -3,7 +3,6 @@ using Book.Components;
 using Book.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,28 +13,9 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddBootstrapBlazor();
 
-builder.Services.AddDbContextFactory<AppDbContext>(opt =>
+// 資料庫、Identity（密碼 / 鎖定規則）與業務服務；測試專案共用同一個註冊方法
+builder.Services.AddBookServices(opt =>
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-// Identity：使用者 + 角色，存於 AppDbContext
-builder.Services.AddIdentityCore<ApplicationUser>(opt =>
-    {
-        opt.Password.RequiredLength = 8;
-        opt.Password.RequireNonAlphanumeric = false;
-        // 密碼規則：至少 8 碼、含英文字母與數字（大小寫不限）
-        opt.Password.RequireUppercase = false;
-        opt.Password.RequireLowercase = false;
-        opt.User.RequireUniqueEmail = false;
-        // 連續失敗 5 次鎖定 5 分鐘
-        opt.Lockout.MaxFailedAccessAttempts = 5;
-        opt.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-    })
-    .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<AppDbContext>();
-
-// 業務邏輯（資料庫）與每個 circuit 一份的登入狀態
-builder.Services.AddSingleton<Book.Services.BookService>();
-builder.Services.AddSingleton<Book.Services.UserService>();
 
 // Cookie 驗證：登入在靜態 SSR 的 /login 頁面寫入 Cookie，登出走 /auth/logout
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
