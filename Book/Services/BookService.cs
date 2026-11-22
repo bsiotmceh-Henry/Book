@@ -81,7 +81,19 @@ public class BookService(IDbContextFactory<AppDbContext> dbFactory)
     public async Task<Result> BorrowAsync(string userId, int bookId)
     {
         await using var db = await dbFactory.CreateDbContextAsync();
-        await using var tx = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+        // ReadCommitted + 依使用者的 applock：只序列化「同一使用者」的借閱（擋重複借閱與 5 本上限的競態），
+        // 不同使用者互不阻塞；避免 Serializable 的 key-range lock 在 SELECT 後 INSERT 造成 deadlock
+        await using var tx = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted);
+
+        var lockResult = new Microsoft.Data.SqlClient.SqlParameter("@result", System.Data.SqlDbType.Int)
+        {
+            Direction = System.Data.ParameterDirection.Output,
+        };
+        // Owner = Transaction：交易結束（commit / rollback / dispose）時自動釋放；回傳值 < 0 代表逾時或失敗
+        await db.Database.ExecuteSqlRawAsync(
+            "EXEC @result = sp_getapplock @Resource = @res, @LockMode = 'Exclusive', @LockOwner = 'Transaction', @LockTimeout = 10000",
+            lockResult, new Microsoft.Data.SqlClient.SqlParameter("@res", $"borrow:{userId}"));
+        if ((int)lockResult.Value < 0) return Result.Fail("系統忙碌中，請稍後再試");
 
         if (await db.BorrowRecords.AnyAsync(r => r.UserId == userId && r.BookId == bookId && r.ReturnedAt == null))
             return Result.Fail("已借閱此書");

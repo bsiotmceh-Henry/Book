@@ -10,13 +10,6 @@ namespace Book.Tests.Services;
 /// </summary>
 public class BorrowConcurrencyTests(SqlServerFixture fx) : IClassFixture<SqlServerFixture>, IAsyncLifetime
 {
-    /// <summary>
-    /// 已知問題：BorrowAsync 的 Serializable 交易先讀 BorrowRecords（key-range lock）再 INSERT，
-    /// 多筆同時借閱會互相卡住，其中一筆被選為 deadlock victim（SqlException 1205），例外未處理會讓 circuit 中斷。
-    /// 修正後（例如改 ReadCommitted + 依使用者 sp_getapplock）移除 Skip。
-    /// </summary>
-    private const string KnownDeadlock = "已知問題：BorrowAsync 併發時 deadlock（SqlException 1205），待修正";
-
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
     /// <summary>每個測試開始前清空借閱紀錄，確保都從空表開始，結果不受測試執行順序影響。</summary>
@@ -28,7 +21,7 @@ public class BorrowConcurrencyTests(SqlServerFixture fx) : IClassFixture<SqlServ
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
-    [Fact(Skip = KnownDeadlock)]
+    [Fact]
     public async Task 多人同時搶最後一本_只有一人成功且庫存不為負()
     {
         const int n = 5;
@@ -46,7 +39,7 @@ public class BorrowConcurrencyTests(SqlServerFixture fx) : IClassFixture<SqlServ
         Assert.Equal(1, await db.BorrowRecords.CountAsync(x => x.BookId == id, Ct));
     }
 
-    [Fact(Skip = KnownDeadlock)]
+    [Fact]
     public async Task 多人同時借不同的書_全部成功()
     {
         const int n = 5;
