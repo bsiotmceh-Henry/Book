@@ -13,6 +13,7 @@ env:
   IMAGE: asia-east1-docker.pkg.dev/moto-hayaku/app/book
   VM_NAME: rosati
   VM_ZONE: asia-east1-b
+  DEPLOY_DIR: /home/h84646513132_business/docker/Book   # 部署位置（絕對路徑）
 
 jobs:
   deploy:
@@ -53,16 +54,18 @@ jobs:
             $VM_NAME:/tmp/book-compose.yml \
             --zone=$VM_ZONE --tunnel-through-iap --quiet
 
-          # 透過 stdin 送腳本到 VM 執行（token 不會出現在指令列）
           gcloud compute ssh $VM_NAME --zone=$VM_ZONE \
-            --tunnel-through-iap --quiet --command "bash -s" <<EOF
+            --tunnel-through-iap --quiet --ssh-key-expire-after=10m \
+            --command "bash -s" <<EOF
           set -e
-          echo "$TOKEN" | sudo docker login -u oauth2accesstoken --password-stdin asia-east1-docker.pkg.dev
-          sudo mkdir -p /opt/book-system
-          sudo mv /tmp/book-compose.yml /opt/book-system/docker-compose.yml
-          cd /opt/book-system
-          export TAG=${GITHUB_SHA}
-          sudo -E docker compose pull
-          sudo -E docker compose up -d
+          echo "$TOKEN" | sudo env HOME=/root docker login -u oauth2accesstoken --password-stdin asia-east1-docker.pkg.dev
+          sudo mkdir -p ${DEPLOY_DIR}
+          sudo mv /tmp/book-compose.yml ${DEPLOY_DIR}/docker-compose.yml
+          # CI 是用 sudo 建的檔案，改回你的帳號所有，你在 VM 上才能直接編輯
+          sudo chown -R h84646513132_business: ${DEPLOY_DIR}
+          cd ${DEPLOY_DIR}
+          sudo env HOME=/root TAG=${GITHUB_SHA} docker compose pull
+          sudo env HOME=/root TAG=${GITHUB_SHA} docker compose up -d
+          sudo env HOME=/root docker logout asia-east1-docker.pkg.dev
           sudo docker image prune -f
           EOF
