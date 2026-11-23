@@ -11,8 +11,8 @@ permissions:
 
 env:
   IMAGE: asia-east1-docker.pkg.dev/moto-hayaku/app/book
-  VM_NAME: 你的VM名稱        # 要改
-  VM_ZONE: 你的zone          # 要改，例如 asia-east1-b
+  VM_NAME: rosati
+  VM_ZONE: asia-east1-b
 
 jobs:
   deploy:
