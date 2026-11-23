@@ -27,7 +27,6 @@ services:
       - "8082:8080"
     environment:
       ASPNETCORE_ENVIRONMENT: Production
-      # 雙底線 = 設定檔的巢狀 key；名稱要對應你程式讀的 key
       ConnectionStrings__DefaultConnection: "Server=db;Database=Book;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True"
 
 volumes:
