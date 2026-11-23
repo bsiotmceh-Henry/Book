@@ -1,0 +1,67 @@
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write            # WIF 需要
+
+env:
+  IMAGE: asia-east1-docker.pkg.dev/moto-hayaku/app/book
+  VM_NAME: 你的VM名稱        # 要改
+  VM_ZONE: 你的zone          # 要改，例如 asia-east1-b
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 用 OIDC 換暫時憑證，不需要任何 key
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/199648797108/locations/global/workloadIdentityPools/github/providers/github-provider
+          service_account: gh-deployer@moto-hayaku.iam.gserviceaccount.com
+
+      - uses: google-github-actions/setup-gcloud@v2
+      - run: gcloud auth configure-docker asia-east1-docker.pkg.dev -q
+      - uses: docker/setup-buildx-action@v3
+
+      # build 並推到 Artifact Registry，用 commit sha 當 tag 方便回滾
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ github.sha }}
+            ${{ env.IMAGE }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Deploy to VM
+        run: |
+          # 取短期 token 讓 VM 能從 Artifact Registry 拉 image
+          TOKEN=$(gcloud auth print-access-token)
+          echo "::add-mask::$TOKEN"
+
+          # 先把 compose 檔傳到 VM
+          gcloud compute scp deploy/docker-compose.yml \
+            $VM_NAME:/tmp/book-compose.yml \
+            --zone=$VM_ZONE --tunnel-through-iap --quiet
+
+          # 透過 stdin 送腳本到 VM 執行（token 不會出現在指令列）
+          gcloud compute ssh $VM_NAME --zone=$VM_ZONE \
+            --tunnel-through-iap --quiet --command "bash -s" <<EOF
+          set -e
+          echo "$TOKEN" | sudo docker login -u oauth2accesstoken --password-stdin asia-east1-docker.pkg.dev
+          sudo mkdir -p /opt/book-system
+          sudo mv /tmp/book-compose.yml /opt/book-system/docker-compose.yml
+          cd /opt/book-system
+          export TAG=${GITHUB_SHA}
+          sudo -E docker compose pull
+          sudo -E docker compose up -d
+          sudo docker image prune -f
+          EOF
