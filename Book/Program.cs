@@ -51,7 +51,19 @@ builder.Services.AddCascadingAuthenticationState();
 
 var app = builder.Build();
 
-// 建立預設管理員
+// 啟動時自動套用尚未執行的 migration（資料庫不存在時會一併建立）
+await using (var migrateScope = app.Services.CreateAsyncScope())
+{
+    var db = await migrateScope.ServiceProvider
+        .GetRequiredService<IDbContextFactory<AppDbContext>>()
+        .CreateDbContextAsync();
+    await using (db)
+    {
+        await db.Database.MigrateAsync();
+    }
+}
+
+// 建立預設管理員（需在 migration 之後）
 await IdentitySeeder.SeedAsync(app.Services);
 
 // Configure the HTTP request pipeline.
