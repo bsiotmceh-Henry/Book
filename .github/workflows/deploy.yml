@@ -33,7 +33,8 @@ jobs:
       # build 並推到 Artifact Registry，用 commit sha 當 tag 方便回滾
       - uses: docker/build-push-action@v6
         with:
-          context: .
+          context: .                  # 維持 repo 根目錄，Dockerfile 的 COPY 路徑才對
+          file: Book/Dockerfile       # 指定 Dockerfile 位置
           push: true
           tags: |
             ${{ env.IMAGE }}:${{ github.sha }}
