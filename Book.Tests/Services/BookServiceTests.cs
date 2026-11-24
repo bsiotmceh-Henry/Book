@@ -68,7 +68,7 @@ public class BookServiceTests(SqlServerFixture fx) : IClassFixture<SqlServerFixt
     }
 
     [Fact]
-    public async Task Search_分頁每頁10筆()
+    public async Task Search_分頁每頁n筆()
     {
         var key = TestData.Unique("p");
         for (var i = 0; i < BorrowRules.PageSize + 1; i++)
@@ -77,8 +77,9 @@ public class BookServiceTests(SqlServerFixture fx) : IClassFixture<SqlServerFixt
         var (page1, total1) = await fx.Books.SearchBooksAsync(key, null, 1);
         var (page2, total2) = await fx.Books.SearchBooksAsync(key, null, 2);
 
-        Assert.Equal(11, total1);
-        Assert.Equal(11, total2);
+        // 總筆數 = 每頁筆數 + 1（第二頁剩 1 筆）
+        Assert.Equal(BorrowRules.PageSize + 1, total1);
+        Assert.Equal(BorrowRules.PageSize + 1, total2);
         Assert.Equal(BorrowRules.PageSize, page1.Count);
         Assert.Single(page2);
         // 依 Id 排序，兩頁不重複
