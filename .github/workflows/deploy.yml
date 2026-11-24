@@ -11,7 +11,7 @@ permissions:
 
 env:
   IMAGE: asia-east1-docker.pkg.dev/moto-hayaku/app/book
-  VM_NAME: rosati
+  VM_NAME: book-vm
   VM_ZONE: asia-east1-b
   DEPLOY_DIR: /home/h84646513132_business/docker/Book   # 部署位置（絕對路徑）
 
